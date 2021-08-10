@@ -398,3 +398,4 @@ clojure.core/str nil
 (use 'beer-song :reload)
 (beer-song/sing 3)
 (beer-song/sing 8 6)
+(exit)
