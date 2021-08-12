@@ -1,29 +1,17 @@
 (ns collatz-conjecture)
 
-; (defn _collatz [num]
-;   (if (not (pos? num))
-;     (throw (Exception. "Collatz calculation requires positive numbers"))
-;     (if (= num 1)
-;       0
-;       (if (even? num)
-;         (collatz(/ num 2))
-;         (collatz(+ 1 (* num 3)))
-;       )
-;     )
-;   )
-; )
-
 (defn collatz [num]
   (if (not (pos? num))
     (throw (Exception. "Collatz calculation requires positive numbers"))
-    (if (= num 1)
-      0
-      (if (even? num)
-        (collatz(/ num 2))
-        (collatz(+ 1 (* num 3)))
+    (loop [count 0 current num]
+      ; (println count "->" current)
+      (if (= current 1)
+        count
+        (if (even? current)
+          (recur (inc count) (/ current 2))
+          (recur (inc count) (+ 1 (* current 3)))
+        )
       )
     )
   )
 )
-
-(collatz 12)
