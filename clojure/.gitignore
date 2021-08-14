@@ -3,3 +3,5 @@ repl-port
 .lein-repl-history
 conjure-log*
 .lsp
+.lein-failures
+target/
