@@ -4,9 +4,6 @@ function Hamming.compute(a,b)
   if #a ~= #b then
     return -1
   end
-  if a == b then
-    return 0
-  end
 
   local count = 0
   for i = 1, #a do
