@@ -1,6 +1,6 @@
 local house = {}
 
-house.phrases = {
+local phrases = {
   { noun = 'house', verb = 'Jack built.' },
   { noun = 'malt', verb = 'lay in' },
   { noun = 'rat', verb = 'ate' },
@@ -18,11 +18,8 @@ house.phrases = {
 house.verse = function(which)
   local buffer = {}
   for i=which,1,-1 do
-    local phrase = house.phrases[i]
-    local separator = '\n'
-    if i == 1 then
-      separator = ' '
-    end
+    local phrase = phrases[i]
+    local separator = i == 1 and ' ' or '\n'
     table.insert(buffer, 'the '..phrase.noun..separator..'that '..phrase.verb)
   end
   return 'This is '..table.concat(buffer, ' ')
@@ -30,7 +27,7 @@ end
 
 house.recite = function()
   local buffer = {}
-  for i=1,#house.phrases do
+  for i=1,#phrases do
     table.insert(buffer, house.verse(i))
   end
   return table.concat(buffer, '\n')
