@@ -3,7 +3,7 @@ return function(array, target)
   local first = array[1]
   local last = array[size]
 
-  if size == 0 or (size == 1 and array[1] ~= target) or target > array[size] or target < array[1] then
+  if size == 0 or (size == 1 and first ~= target) or target < first or target > last then
     return -1
   end
 
@@ -13,10 +13,6 @@ return function(array, target)
 
   if last == target then
     return size
-  end
-
-  if size == 1 and first == target then
-    return 1
   end
 
   local index = math.ceil(size / 2)
