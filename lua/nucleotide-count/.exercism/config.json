@@ -1,0 +1,24 @@
+{
+  "blurb": "Given a DNA string, compute how many times each nucleotide occurs in the string.",
+  "authors": [
+    "aarti"
+  ],
+  "contributors": [
+    "kytrinyx",
+    "ryanplusplus",
+    "sjakobi"
+  ],
+  "files": {
+    "solution": [
+      "nucleotide-count.lua"
+    ],
+    "test": [
+      "nucleotide-count_spec.lua"
+    ],
+    "example": [
+      ".meta/example.lua"
+    ]
+  },
+  "source": "The Calculating DNA Nucleotides_problem at Rosalind",
+  "source_url": "http://rosalind.info/problems/dna/"
+}
