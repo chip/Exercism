@@ -1,20 +1,22 @@
 return function(sum)
   local triplets = {}
 
-  for a=2,sum do
+  local limit = sum / 2
+  local a = 3
+  while a < limit do
+    local b = a + 1
     local b_limit = sum - a
-    for b=(a+1),b_limit do
-      local ab = (a ^ 2) + (b ^ 2)
-      local sqrt_c = math.sqrt(ab)
-      if math.floor(sqrt_c) == sqrt_c then
-        for c=(b+1),sqrt_c do
-          local c2 = c ^ 2
-          if (ab == c2) and (a < b and b < c) and (a + b + c == sum) then
-            table.insert(triplets, {a, b ,c})
-          end
-        end
+    while b < b_limit do
+      local c_squared = (a ^ 2) + (b ^ 2)
+      local c_root  = math.sqrt(c_squared)
+      local c = math.floor(c_root)
+      -- test that square root of c is an integer
+      if c == c_root and (a + b + c == sum) then
+        table.insert(triplets, {a, b ,c})
       end
+      b = b + 1
     end
+    a = a + 1
   end
 
   return triplets
