@@ -1,7 +1,6 @@
 return function(array, target)
   local ceil = math.ceil
   local index = #array == 1 and 1 or ceil(#array / 2)
-  local found = false
   local elements = #array
   while elements > 0 do
     local value = array[index]
@@ -21,5 +20,5 @@ return function(array, target)
       index = index + ceil(elements / 2)
     end
   end
-  return found and index or -1
+  return -1
 end
