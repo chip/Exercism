@@ -7,17 +7,14 @@ return function(array, target)
     local value = array[index]
 
     if target == value then
-      found = true
-      elements = 0
-      break
+      return index
     end
 
     elements = #array - index
 
     if target < value then
       if index == 1 then
-        elements = 0
-        break
+        return -1
       end
       index = ceil(index / 2)
     else
