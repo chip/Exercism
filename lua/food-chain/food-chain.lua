@@ -23,16 +23,16 @@ local function swallowedUntil(n, answer)
   end
 end
 
-local function swallowed(n)
+local function swallowed_phrases(n)
   return swallowedUntil(n, "")
 end
 
-local function first(n)
+local function first_phrase(n)
   local know = "I know an old lady who swallowed a %s."
   return know:format(animals[n])
 end
 
-local function second(n)
+local function second_phrase(n)
   if n == 8 then
     return ""
   else
@@ -40,7 +40,7 @@ local function second(n)
   end
 end
 
-local function last(n)
+local function last_phrase(n)
   if n == #animals then
     return "She's dead, of course!\n"
   else
@@ -49,12 +49,12 @@ local function last(n)
 end
 
 local function verse(which)
-  local buffer = first(which) .. "\n"
+  local buffer = first_phrase(which) .. "\n"
   if which > 1 and which < 8 then
-    buffer = buffer .. second(which) .. "\n"
-    buffer = buffer .. swallowed(which)
+    buffer = buffer .. second_phrase(which) .. "\n"
+    buffer = buffer .. swallowed_phrases(which)
   end
-  buffer = buffer .. last(which)
+  buffer = buffer .. last_phrase(which)
   if which < 8 then
     buffer = buffer .. "\n"
   end
