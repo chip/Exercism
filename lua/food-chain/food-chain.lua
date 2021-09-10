@@ -1,15 +1,23 @@
 local animals = { "fly", "spider", "bird", "cat", "dog", "goat", "cow", "horse" }
+local phrases = {
+  "that wriggled and jiggled and tickled inside her.",
+  "It wriggled and jiggled and tickled inside her.",
+  "How absurd to swallow a bird!",
+  "Imagine that, to swallow a %s!",
+  "What a hog, to swallow a dog!",
+  "Just opened her throat and swallowed a goat!",
+  "I don't know how she swallowed a cow!",
+}
 
 local function swallowedUntil(n, answer)
   if n == 1 then
     return answer
   else
+    local s = "She swallowed the %s to catch the %s%s"
     if n == 3 then
-      answer = answer .. "She swallowed the %s to catch the %s that wriggled and jiggled and tickled inside her%s"
-    else
-      answer = answer .. "She swallowed the %s to catch the %s%s"
+      s = "She swallowed the %s to catch the %s that wriggled and jiggled and tickled inside her%s"
     end
-    answer = answer:format(animals[n], animals[n-1], ".\n")
+    answer = answer .. s:format(animals[n], animals[n-1], ".\n")
 
     return swallowedUntil(n - 1, answer)
   end
@@ -25,27 +33,10 @@ local function first(n)
 end
 
 local function second(n)
-  local wriggled = "%s wriggled and jiggled and tickled inside her."
-  if n == 2 then
-    return wriggled:format("It")
-  elseif n == 3 then
-    return "How absurd to swallow a bird!"
-  elseif n == 4 then
-    local s = "Imagine that, to swallow a %s!"
-    return s:format(animals[n])
-  elseif n == 5 then
-    local s = "What a hog, to swallow a dog!"
-    return s:format(animals[n])
-  elseif n == 6 then
-    local s = "Just opened her throat and swallowed a goat!"
-    return s:format(animals[n])
-  elseif n == 7 then
-    local s = "I don't know how she swallowed a cow!"
-    return s:format(animals[n])
-  elseif n == 8 then
+  if n == 8 then
     return ""
   else
-    return wriggled:format("that")
+    return phrases[n]:format(animals[n])
   end
 end
 
@@ -59,11 +50,9 @@ end
 
 local function verse(which)
   local buffer = first(which) .. "\n"
-  if which > 1 then
-    if which < 8 then
-      buffer = buffer .. second(which) .. "\n"
-      buffer = buffer .. swallowed(which)
-    end
+  if which > 1 and which < 8 then
+    buffer = buffer .. second(which) .. "\n"
+    buffer = buffer .. swallowed(which)
   end
   buffer = buffer .. last(which)
   if which < 8 then
