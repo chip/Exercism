@@ -1,5 +1,9 @@
-(ns interest-is-interesting
-  (:require [clojure.math.numeric-tower :as math]))
+(ns interest-is-interesting)
+
+(defn abs
+  "Return the absolute value of a number"
+  [num]
+  (if (neg? num) (- num) num))
 
 (defn interest-rate
   "Calculate the interest rate based on the specified balance"
@@ -15,7 +19,7 @@
 (defn interest-earned
   "Calculate the interest earned based on the specified balance"
   [balance]
-  (* (bigdec (interest-multiplier (interest-rate balance))) (math/abs balance)))
+  (* (bigdec (interest-multiplier (interest-rate balance))) (abs balance)))
 
 (defn annual-balance-update
   "Calculate the annual balance update, taking into account the interest rate"
