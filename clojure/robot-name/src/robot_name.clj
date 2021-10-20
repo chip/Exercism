@@ -1,25 +1,31 @@
 (ns robot-name)
 
+(defn random-name []
+  (let [letters (repeatedly 2 #(char (+ (rand 26) 65)))
+        numbers (repeatedly 3 #(rand-int 10))]
+    (apply str (concat letters numbers))))
+
 (def memory (atom {}))
 (def robots (atom #{}))
 
-(defn random-name []
-  (let [letters (repeatedly 2 #(char (+ (rand 26) 65)))
-        numbers (repeatedly 3 #(rand-int 10))
-        its-name (apply str (concat letters numbers))]
-    (if (contains? @robots its-name) (recur) its-name)))
+(defn update-memory [id its-name]
+  (swap! robots conj its-name)
+  (swap! memory assoc id its-name))
 
-(defn update-memory [robot-key robot-name]
-  (swap! robots conj robot-name)
-  (swap! memory assoc robot-key robot-name))
+(defn ensure-new-name [id]
+  (loop [its-name (random-name)]
+    (if-not (@robots its-name)
+      (update-memory id its-name)
+      (recur id))))
 
 (defn robot []
-  (let [robot-key (keyword (gensym "robot-")) robot-name (random-name)]
-    (update-memory robot-key robot-name)
-    robot-key))
+  (let [id (gensym "robot-")]
+    (ensure-new-name id)
+    id))
 
-(defn robot-name [robot-key]
-  (@memory robot-key))
+(defn robot-name [id]
+  (@memory id))
 
-(defn reset-name [robot-key]
-  (when (contains? @robots (@memory robot-key)) (update-memory robot-key (random-name))))
+(defn reset-name [id]
+  (when (@robots (robot-name id))
+    (ensure-new-name id)))
