@@ -8,24 +8,22 @@
 (def memory (atom {}))
 (def robots (atom #{}))
 
-(defn update-memory [id its-name]
-  (swap! robots conj its-name)
-  (swap! memory assoc id its-name))
+(defn robot-name [id]
+  (@memory id))
 
 (defn ensure-new-name [id]
-  (loop [its-name (random-name)]
-    (if-not (@robots its-name)
-      (update-memory id its-name)
-      (recur id))))
+  (loop [n (random-name)]
+    (if (@robots n)
+      (recur id)
+      (do
+        (swap! robots disj (robot-name id))
+        (swap! robots conj n)
+        (swap! memory assoc id n)))))
 
 (defn robot []
   (let [id (gensym "robot-")]
     (ensure-new-name id)
     id))
 
-(defn robot-name [id]
-  (@memory id))
-
 (defn reset-name [id]
-  (when (@robots (robot-name id))
-    (ensure-new-name id)))
+  (ensure-new-name id))
