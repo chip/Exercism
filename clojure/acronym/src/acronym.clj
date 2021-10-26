@@ -1,9 +1,6 @@
 (ns acronym
   (:require [clojure.string :as str]))
 
-(defn split-words [s]
-  (str/split s #"\b"))
-
 (defn first-character [s]
   (subs s 0 1))
 
@@ -16,6 +13,9 @@
 
 (defn split-mixed-case [s]
   (str/replace s #"([A-Z]{1}[a-z]+)" "$1 "))
+
+(defn split-words [s]
+  (str/split s #"\b"))
 
 (defn acronym [s]
   (if (empty? s)
