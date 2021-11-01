@@ -26,7 +26,7 @@
                      "clergy"  "largely"   "leading"]]
            (anagram/anagrams-for "allergy" coll)))))
 
-(deftest ^:test-refresh/focus case-insensitive-anagrams
+(deftest case-insensitive-anagrams
   (is (= ["Carthorse"]
          (let [coll ["cashregister" "Carthorse" "radishes"]]
            (anagram/anagrams-for "Orchestra" coll)))))
