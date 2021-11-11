@@ -1,74 +1,59 @@
 (ns pig-latin
   (:require [clojure.string :as str]))
 
-(def patterns
-  '("thr" "sch" "squ" "th" "ch" "qu" "q" "k" "y" "x" "p" "a" "e" "i" "o" "u"))
+(def vowels #{\a \e \i \o \u})
 
-(defn starts-with-vowel?
-  [s]
-  ; (prn "starts-with-vowel?" s)
-  (contains? #{"a" "e" "i" "o" "u"} (subs s 0 1)))
+(defn all-consonants? [s n]
+  (not-any? #(contains? vowels %) (take n s)))
 
-(defn starts-with-this
-  [c s]
-  (= c (subs s 0 (count c))))
+(defn starts-with-consonant-cluster? [s]
+  (all-consonants? s 2))
 
-(defn common?
-  [s]
-  (prn "common?" s)
-  (first (filter #(starts-with-this % s) patterns)))
+(defn starts-with-vowel-sound? [s]
+  (or
+    (= "yt" (subs s 0 2))
+    (= "xr" (subs s 0 2))
+    (not (all-consonants? s 1))))
 
-(defn matcher
-  [s]
-  (re-pattern (str "^(" s ")(.+)$")))
+(defn matcher-var [s]
+  (if (str/starts-with? s "qu")
+    (str "{2}")
+    (str "*" s)))
 
-(defn pigify
-  [s c]
-  ; (prn "pigify" s c)
-  (let [matches (re-find (matcher c) s)]
-    (prn "matches " matches)
-    (str (last matches) (second matches) "ay")))
+(defn matcher-str [s]
+  (prn "matcher-str" (str "^(." (matcher-var s) ")(.+)$"))
+  (str "^(." (matcher-var s) "(.+)$"))
 
-(defn starts-with-vowel-then-qu?
-  [s]
-  ; (prn "starts-with-vowel-then-qu?" s)
-  (and (starts-with-vowel? s) (= "qu" (subs s 1 3))))
+(defn parse [s]
+  (prn "parse" s)
+  (let [match (re-find (re-pattern (matcher-str s)) s)]
+    (prn "match" match)
+    (str (last match) (second match) "ay")))
 
-(defn starts-with-q-only?
-  [s]
-  (and (not (starts-with-this "qu" s)) (starts-with-this "q" s)))
+(defn join-str [s n]
+  (str (subs s n (count s)) (subs s 0 n) "ay"))
 
-(defn words
-  [s]
+(defn words [s]
   (str/split s #"\s"))
 
-(defn phrase?
-  [s]
+(defn phrase? [s]
   (> (count (words s)) 1))
 
-(defn process-word
-  [s]
-  (prn "process-word" s)
-  (let [start (common? s)]
-    (prn "start" start)
-    (cond
-      (nil? start) (str (subs s 1 (count s)) (subs s 0 1) "ay")
-      (starts-with-q-only? s) (pigify s start)
-      (starts-with-vowel-then-qu? s) (str s "ay")
-      (starts-with-this "yt" s) (str s "ay")
-      (starts-with-this "xr" s) (str s "ay")
-      (starts-with-vowel? s) (str s "ay")
-      (common? s) (pigify s start)
-      :else (do
-              (prn "else")
-              (str s "ay")
-              ))))
+(defn process-word [s]
+  ; (prn "process-word" s)
+  (cond
+    (starts-with-vowel-sound? s) (str s "ay")
+    (str/starts-with? s "thr") (join-str s 3)
+    (str/starts-with? s "th") (join-str s 2)
+    (str/starts-with? s "ch") (join-str s 2)
+    (str/starts-with? s "qu") (join-str s 2)
+    (starts-with-consonant-cluster? s) (join-str s 3)
+    (all-consonants? s 1) (join-str s 1)
+    :else (parse s)))
 
-(defn process-phrase
-  [s]
+(defn process-phrase [s]
+  ; (prn "process-phrase" s)
   (str/join " " (map process-word (words s))))
 
-(defn translate
-  [s]
-  (prn "translate " s)
+(defn translate [s]
   (if (phrase? s) (process-phrase s) (process-word s)))
