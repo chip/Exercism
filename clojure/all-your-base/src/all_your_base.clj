@@ -1,10 +1,10 @@
 (ns all-your-base)
 
 (defn to-base [n b]
-  (loop [q (quot n b), digits (list (rem n b))]
+  (loop [digits (list (rem n b)), q (quot n b)]
     (if (zero? q)
       digits
-      (recur (quot q b) (conj digits (rem q b))))))
+      (recur (conj digits (rem q b)) (quot q b)))))
 
 (defn to-decimal [b1 nums]
   (->> (reverse nums)
@@ -12,9 +12,7 @@
        (reduce +)))
 
 (defn valid? [b1 nums b2]
-  (->> nums
-    (every? #(< -1 % b1))
-    (and (seq nums) (> b2 1) (> b1 1))))
+  (and (seq nums) (> b2 1) (> b1 1) (every? #(< -1 % b1) nums)))
 
 (defn convert [b1 nums b2]
   (when (valid? b1 nums b2)
