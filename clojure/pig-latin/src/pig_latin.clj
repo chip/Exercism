@@ -3,35 +3,50 @@
 
 (def vowels #{\a \e \i \o \u})
 
-(defn all-consonants? [s n]
-  (not-any? #(contains? vowels %) (take n s)))
+(def special-sounds '("squ" "qu" "thr" "th" "sch" "ch"))
 
-(defn starts-with-consonant-cluster? [s]
-  (all-consonants? s 2))
+(defn special-consonant-sound? [s]
+  (some #(str/starts-with? s %) special-sounds))
 
-(defn starts-with-vowel-sound? [s]
-  (or
-    (= "yt" (subs s 0 2))
-    (= "xr" (subs s 0 2))
-    (not (all-consonants? s 1))))
+(defn starts-with-consonant? [s]
+  (not-any? #(contains? vowels %) (take 1 s)))
+
+(defn special-start [s]
+  (first (filter #(str/starts-with? s %) special-sounds)))
 
 (defn matcher-var [s]
-  (if (str/starts-with? s "qu")
-    (str "{2}")
+  (if (special-consonant-sound? s)
+    (str "{" (count (special-start s)) "}")
     (str "*" s)))
 
 (defn matcher-str [s]
-  (prn "matcher-str" (str "^(." (matcher-var s) ")(.+)$"))
-  (str "^(." (matcher-var s) "(.+)$"))
+  (str "^(." (matcher-var s) ")(.+)$"))
 
 (defn parse [s]
-  (prn "parse" s)
   (let [match (re-find (re-pattern (matcher-str s)) s)]
-    (prn "match" match)
     (str (last match) (second match) "ay")))
 
-(defn join-str [s n]
-  (str (subs s n (count s)) (subs s 0 n) "ay"))
+(defn starting-consonants [s]
+  (take-while #(not (contains? vowels %)) s))
+
+(defn length [s]
+  (let [special (special-start s)]
+    (if special
+      (count special)
+      (count (starting-consonants s)))))
+
+(defn join-str [s]
+  (let [n (length s)]
+    (str (subs s n (count s)) (subs s 0 n) "ay")))
+
+(defn vowel-sound? [s]
+  (or (not (starts-with-consonant? s)) (str/starts-with? s "yt") (str/starts-with? s "xr")))
+
+(defn process-word [s]
+  (cond
+    (vowel-sound? s) (str s "ay")
+    (or (special-consonant-sound? s) (starts-with-consonant? s)) (join-str s)
+    :else (parse s)))
 
 (defn words [s]
   (str/split s #"\s"))
@@ -39,21 +54,7 @@
 (defn phrase? [s]
   (> (count (words s)) 1))
 
-(defn process-word [s]
-  ; (prn "process-word" s)
-  (cond
-    (starts-with-vowel-sound? s) (str s "ay")
-    (str/starts-with? s "thr") (join-str s 3)
-    (str/starts-with? s "th") (join-str s 2)
-    (str/starts-with? s "ch") (join-str s 2)
-    (str/starts-with? s "qu") (join-str s 2)
-    (starts-with-consonant-cluster? s) (join-str s 3)
-    (all-consonants? s 1) (join-str s 1)
-    :else (parse s)))
-
-(defn process-phrase [s]
-  ; (prn "process-phrase" s)
-  (str/join " " (map process-word (words s))))
-
 (defn translate [s]
-  (if (phrase? s) (process-phrase s) (process-word s)))
+  (if (phrase? s)
+    (str/join " " (map process-word (words s)))
+    (process-word s)))
