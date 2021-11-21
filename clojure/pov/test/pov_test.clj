@@ -100,7 +100,7 @@
   (is (= singleton
          (pov/of :x singleton))))
 
-(deftest ^:test-refresh/focus simple-trees
+(deftest simple-trees
   (is (= simple-pulled
          (pov/of :x simple-tree))))
 
