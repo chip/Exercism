@@ -4,9 +4,9 @@
 (def dna-to-rna {:G "C", :C "G", :T "A", :A "U"})
 
 (defn translate [dna]
-  (if-let [t (get dna-to-rna (keyword dna))]
+  (if-let [t (get dna-to-rna (keyword (first dna)))]
     t
     (throw (AssertionError. "Invalid DNA strand"))))
 
 (defn to-rna [dna]
-  (str/join (map #(translate (first %)) (re-seq #"(.)" dna))))
+  (str/join (map translate (re-seq #"(.)" dna))))
