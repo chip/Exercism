@@ -5,7 +5,7 @@
 (deftest data-is-retained
   (is (= 4 (bst/value (bst/singleton 4)))))
 
-(deftest inserting-less
+(deftest ^:test-refresh/focus inserting-less
   (let [t (bst/insert 2 (bst/singleton 4))]
     (is (= 4 (bst/value t)))
     (is (= 2 (bst/value (bst/left t))))))
@@ -20,6 +20,12 @@
     (is (= 4 (bst/value t)))
     (is (= 5 (bst/value (bst/right t))))))
 
+;         4
+;       /   \
+;      2     6
+;     / \   / \
+;    1   3 5   7
+;     
 (deftest complex-tree
   (let [t (bst/from-list [4 2 6 1 3 7 5])]
     (is (= 4 (bst/value t)))

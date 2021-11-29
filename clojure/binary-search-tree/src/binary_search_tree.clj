@@ -1,16 +1,23 @@
-(ns binary-search-tree)
+(ns binary-search-tree
+  (require [clojure.string :as str]))
 
-(defn value [] ;; <- arglist goes here
-  ;; your code goes here
-)
+(str/split-lines "1\n10001") ; read-string
+(defrecord Node [el left right])
 
-(defn singleton [] ;; <- arglist goes here
-  ;; your code goes here
-)
+(defn value [n]
+  (:el n))
 
-(defn insert [] ;; <- arglist goes here
-  ;; your code goes here
-)
+(defn singleton [el]
+  (prn "singleton" el)
+  (Node. el nil nil))
+
+(defn insert
+  [el]
+  (singleton el)
+  [el node]
+  (prn "node value" (value node))
+  (singleton el)
+  )
 
 (defn left [] ;; <- arglist goes here
   ;; your code goes here

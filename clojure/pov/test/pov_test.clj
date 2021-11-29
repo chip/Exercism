@@ -116,7 +116,7 @@
   (is (= cousins-pulled
          (pov/of :x cousins))))
 
-(deftest complex-trees
+(deftest ^:test-refresh/focus complex-trees
   (is (= with-kids-pulled
          (pov/of :x target-with-children))))
 
