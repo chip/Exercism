@@ -1,12 +1,9 @@
-(ns rna-transcription
-  (:require [clojure.string :as str]))
+(ns rna-transcription)
 
-(def dna-to-rna {:G "C", :C "G", :T "A", :A "U"})
+(def rna-complement {\G \C, \C \G, \T \A, \A \U})
 
 (defn translate [dna]
-  (if-let [t (get dna-to-rna (keyword (first dna)))]
-    t
-    (throw (AssertionError. "Invalid DNA strand"))))
+  (or (get rna-complement dna) (throw (AssertionError. "Invalid DNA strand"))))
 
 (defn to-rna [dna]
-  (str/join (map translate (re-seq #"(.)" dna))))
+  (apply str (map translate dna)))
