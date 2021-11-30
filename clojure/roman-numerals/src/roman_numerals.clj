@@ -28,27 +28,14 @@
     (>= n 9) 9
     (>= n 5) 5
     (>= n 4) 4
-    (>= n 1) 1
-   ))
-
-; (def roman-complement {1 \I, 5 \V, 10 \X, 50 \L, 100 \C, 500 \D, 1000 \M})
-;; Convert a number to a roman numeral
-;; Compares the number to the previous number in the list and subtracts
-;; the previous number if the current number is greater than the previous
+    (>= n 1) 1))
 
 (defn divisors [a]
   (loop [divisors [] n a]
-    (prn "divisors" divisors)
-    (prn "loop n" n)
     (if (zero? n)
       divisors
       (let [d (divisor n) remainder (- n d)]
-        (prn "d" d)
-        (prn "remainder" remainder)
         (recur (conj divisors d) remainder)))))
 
 (defn numerals [n]
-  (prn "numerals" n)
-  (let [d (divisors n)]
-    (prn "numerals d" d)
-    (apply str (map roman-complement d))))
+  (apply str (map roman-complement (divisors n))))
