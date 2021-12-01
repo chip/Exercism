@@ -1,7 +1,7 @@
 (ns raindrops)
 
 (defn sound [n [d s]]
-  (if (zero? (mod n d)) s ""))
+  (when (zero? (mod n d)) s))
 
 (defn raindrops [n]
   (map #(sound n %) {3 "Pling" 5 "Plang" 7 "Plong"}))
