@@ -1,21 +1,11 @@
 (ns run-length-encoding)
 
-(defn encode-matcher
-  [text]
-  "find letters and encode with count if repeated: FFFFF to 5F"
-  (re-matcher #"([A-Za-z ])\1*" text))
-
-(defn decode-matcher
-  [text]
-  "finding the count of a letter: 5F to FFFFF"
-  (re-matcher #"([0-9]+)?([A-Za-z ]{1})" text))
-
 (defn matcher
   "return appropriate regex match per given action"
   [text action]
   (if (= action :encode)
-    (encode-matcher text)
-    (decode-matcher text)))
+    (re-matcher #"([A-Za-z ])\1*" text)
+    (re-matcher #"([0-9]+)?([A-Za-z ]{1})" text)))
 
 (defn letter-count
   "return letter count if more than 1 is found"
@@ -61,12 +51,12 @@
 
 (defn run-length-encode
   "encodes a string with run-length-encoding"
-  [text]
-  (if (empty? text)
-    text
-    (parse text :encode)))
+  [s]
+  (if (empty? s)
+    s
+    (parse s :encode)))
 
 (defn run-length-decode
   "decodes a run-length-encoded string"
-  [text]
-  (parse text :decode))
+  [s]
+  (parse s :decode))
