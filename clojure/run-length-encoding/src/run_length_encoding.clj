@@ -1,26 +1,21 @@
 (ns run-length-encoding)
 
-(defn text-matcher [t]
+(defn encode-matcher [t]
   (re-matcher #"([A-Za-z ])\1*" t))
 
+(defn letter-count [m]
+  (let [c (count m)]
+    (when (> c 1)
+      c)))
+
 (defn parse [plain-text]
-  (prn "parse" plain-text)
-  (let [m (re-matcher #"([A-Za-z ])\1*" plain-text)]
+  (let [matcher (encode-matcher plain-text)]
     (loop [acc ""]
-      (prn "acc" acc)
-      (let [match (re-find m)]
+      (let [match (re-find matcher)]
         (if match
-          (do
-            (prn "match" match)
-            (prn "get match 0" (get match 0))
-            (prn "first match" (first match))
-            (let [c (count (get match 0)) letter (get match 1)]
-              (if (> c 1)
-                (recur (str acc c letter))
-                (recur (str acc letter))
-                )))
-          acc
-          )))))
+          (let [[full-match letter] match, c (letter-count full-match)]
+            (recur (str acc c letter)))
+          acc)))))
 
 (defn run-length-encode
   "encodes a string with run-length-encoding"
@@ -30,38 +25,18 @@
 (defn convert-count [c]
   (cond 
     (or (nil? c) (= " " c)) 1
-    :else (Integer/parseInt c)
-    ))
+    :else (Integer/parseInt c)))
+
+(defn decode-matcher [t]
+  (re-matcher #"([0-9]+)?([A-Za-z ]{1})" t))
 
 (defn run-length-decode
   "decodes a run-length-encoded string"
   [cipher-text]
-  (prn "cipher-text:" cipher-text)
-
-  (let [m (re-matcher #"([0-9]+)?([A-Za-z ]{1})" cipher-text)]
+  (let [m (decode-matcher cipher-text)]
     (loop [acc ""]
-      (prn "acc:" acc)
       (let [match (re-find m)]
         (if match
-          (do
-            (prn "match:" match)
-            (prn "2nd match:" (second match))
-            (let [sm (second match)]
-              ; (prn "2nd match parsed:" (Integer/parseInt ((fnil + 0) sm))))
-              (prn "last match:" (last match))
-              ; (prn "fnil" ((fnil + 0) (get match 1)))
-              ; (prn "fnil second" ((fnil + 0) (Integer/parseInt (second match))))
-              (let [c (convert-count sm) letter (last match) s (apply str (repeat c letter))]
-                (prn "c" c)
-                (prn "s" s)
-                (prn "letter" letter)
-                (recur (str acc s))
-                )
-              ))
-          acc
-          )
-        ))))
-
-; (= "3z 2Z2 zZ" (run-length-encode "zzz ZZ  zZ"))
-; (= "zzz ZZ  zZ" (run-length-decode "3z 2Z2 zZ"))
-(run-length-decode "3z 2Z2 zZ")
+          (let [sm (second match) c (convert-count sm) letter (last match)]
+            (recur (str acc (apply str (repeat c letter)))))
+          acc)))))
