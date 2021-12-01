@@ -1,42 +1,68 @@
 (ns run-length-encoding)
 
-(defn encode-matcher [t]
-  (re-matcher #"([A-Za-z ])\1*" t))
+(defn encode-matcher
+  [text]
+  "find letters and encode with count if repeated: FFFFF to 5F"
+  (re-matcher #"([A-Za-z ])\1*" text))
 
-(defn letter-count [m]
+(defn decode-matcher
+  [text]
+  "finding the count of a letter: 5F to FFFFF"
+  (re-matcher #"([0-9]+)?([A-Za-z ]{1})" text))
+
+(defn matcher
+  "return appropriate regex match per given action"
+  [text action]
+  (if (= action :encode)
+    (encode-matcher text)
+    (decode-matcher text)))
+
+(defn letter-count
+  "return letter count if more than 1 is found"
+  [m]
   (let [c (count m)]
     (when (> c 1)
       c)))
 
-(defn parse [plain-text]
-  (let [matcher (encode-matcher plain-text)]
+(defn encode
+  "encode a regex match"
+  [match]
+  (let [[full-match letter] match]
+    (str (letter-count full-match) letter)))
+
+(defn match-count-to-int
+  "convert regex match count to an integer: nil or single space to 1; \"3\" to 3"
+  [s]
+  (cond 
+    (or (nil? s) (= " " s)) 1
+    :else (Integer/parseInt s)))
+
+(defn decode
+  "decode a regex match"
+  [match]
+  (let [[_ c letter] match, n (match-count-to-int c)]
+    (apply str (repeat n letter))))
+
+(defn parse
+  "parse text according to action"
+  [text action]
+  (let [m (matcher text action)]
     (loop [acc ""]
-      (let [match (re-find matcher)]
+      (let [match (re-find m)]
         (if match
-          (let [[full-match letter] match, c (letter-count full-match)]
-            (recur (str acc c letter)))
+          (if (= action :encode)
+            (recur (str acc (encode match)))
+            (recur (str acc (decode match))))
           acc)))))
 
 (defn run-length-encode
   "encodes a string with run-length-encoding"
-  [plain-text]
-  (if (empty? plain-text) plain-text (parse plain-text)))
-
-(defn convert-count [c]
-  (cond 
-    (or (nil? c) (= " " c)) 1
-    :else (Integer/parseInt c)))
-
-(defn decode-matcher [t]
-  (re-matcher #"([0-9]+)?([A-Za-z ]{1})" t))
+  [text]
+  (if (empty? text)
+    text
+    (parse text :encode)))
 
 (defn run-length-decode
   "decodes a run-length-encoded string"
-  [cipher-text]
-  (let [m (decode-matcher cipher-text)]
-    (loop [acc ""]
-      (let [match (re-find m)]
-        (if match
-          (let [sm (second match) c (convert-count sm) letter (last match)]
-            (recur (str acc (apply str (repeat c letter)))))
-          acc)))))
+  [text]
+  (parse text :decode))
