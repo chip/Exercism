@@ -43,6 +43,12 @@
   (let [[_ c letter] match, n (match-count-to-int c)]
     (apply str (repeat n letter))))
 
+(defn build-str [action match]
+  "build string based on regex match; invoke fn based upon action arg"
+  (if (= action :encode)
+    (encode match)
+    (decode match)))
+
 (defn parse
   "parse text according to action"
   [text action]
@@ -50,9 +56,7 @@
     (loop [acc ""]
       (let [match (re-find m)]
         (if match
-          (if (= action :encode)
-            (recur (str acc (encode match)))
-            (recur (str acc (decode match))))
+          (recur (str acc (build-str action match)))
           acc)))))
 
 (defn run-length-encode
