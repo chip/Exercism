@@ -33,8 +33,9 @@
   (let [[_ c letter] match, n (match-count-to-int c)]
     (apply str (repeat n letter))))
 
-(defn build-str [action match]
+(defn build-str
   "build string based on regex match; invoke fn based upon action arg"
+  [action match]
   (if (= action :encode)
     (encode match)
     (decode match)))
