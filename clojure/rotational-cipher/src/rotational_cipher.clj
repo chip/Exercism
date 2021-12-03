@@ -1,32 +1,40 @@
-(ns rotational-cipher)
+(ns rotational-cipher
+  (:require [clojure.string :as str]))
 
+(def uppercase "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+(def lowercase "abcdefghijklmnopqrstuvwxyz")
 (def ascii-offset-A 65)
 (def ascii-offset-a 97)
 (def alphabet-count 26)
 
-(defn generate-letters [n] (into [] (map #(char (+ % n)) (range alphabet-count))))
+(defn upper-case?
+  "Determine if letter is uppercase A-Z"
+  [c]
+  (re-find #"[A-Z]" (str c)))
 
-(defn letters [c]
-  (if (re-find #"[A-Z]" (str c))
-    (generate-letters ascii-offset-A) ; upper-case letters 
-    (generate-letters ascii-offset-a))) ; lower-case letterse
+(defn lower-case?
+  "Determine if letter is lowercase a-z"
+  [c]
+  (re-find #"[a-z]" (str c)))
 
-(defn letter-index [c]
-  (first (keep-indexed #(when (= c %2) %1) (letters c))))
+(defn convert-char
+  "Find index i of letters in lowercase/uppercase string.
+  Add index i to n arg to get the remainder when divisor is alphabet-count.
+  Remainder is used in cases where offset will be out-of-bounds of letters string.
+  Return ascii character of letter based on letters."
+  [c n letters offset]
+  (let [i (str/index-of letters c)]
+    (char (+ (mod (+ n i) alphabet-count) offset))))
 
-(defn ascii-offset [c]
-  (if (re-find #"[A-Z]" (str c))
-    ascii-offset-A
-    ascii-offset-a))
-
-(defn process [c n]
-  (let [i (letter-index c) o (mod (+ n i) 26)]
-    (char (+ o (ascii-offset c)))))
-
-(defn map-char [c n]
+(defn filter-alphabet
+  "Process upper and lower case letters; skip others"
+  [c n]
   (cond
-    (re-find #"[A-Za-z]" (str c)) (process c n)
+    (upper-case? c) (convert-char c n uppercase ascii-offset-A) 
+    (lower-case? c) (convert-char c n lowercase ascii-offset-a) 
     :else c))
 
-(defn rotate [s n]
-  (apply str (map #(map-char %1 n) s)))
+(defn rotate
+  "Rotate each character of string s by n offset"
+  [s n]
+  (apply str (map #(filter-alphabet (str %1) n) s)))
