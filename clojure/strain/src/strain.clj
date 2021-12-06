@@ -2,15 +2,17 @@
 
 (defn retain [pred coll]
   (loop [retained [] remaining coll]
-    (if (empty? remaining)
-      retained
-      (if (pred (first remaining))
-        (recur (conj retained (first remaining)) (rest remaining))
-        (recur retained (rest remaining))))))
+    (let [item (first remaining) remaining-items (rest remaining)]
+      (if (empty? remaining)
+        retained
+        (if (pred item)
+          (recur (conj retained item) remaining-items)
+          (recur retained remaining-items))))))
 
 (defn discard [pred coll]
   (if (empty? coll)
     coll
-    (if (pred (first coll))
-      (discard pred (rest coll))
-      (cons (first coll) (discard pred (rest coll))))))
+    (let [item (first coll) remaining-items (rest coll)]
+      (if (pred item)
+        (discard pred remaining-items)
+        (cons item (discard pred remaining-items))))))
