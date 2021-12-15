@@ -14,7 +14,7 @@
   (is (= (issue 23 #{1 4 15 20 50})
          '(4 4 15))))
 
-(deftest change-with-elbonia-coins
+(deftest ^:test-refresh/focus change-with-elbonia-coins
   (is (= (issue 63 #{1 5 10 21 25})
          '(21 21 21))))
 
