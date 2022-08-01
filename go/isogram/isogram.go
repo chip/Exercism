@@ -1,27 +1,20 @@
 // Package isogram can determine if a word or phrase is without a repeating letter
-// package isogram
 package isogram
 
-import "strings"
+import (
+	"strings"
+	"unicode"
+)
 
-// Determine if a given word is a "non-pattern" word (i.e., contains no
-// repeating letters, excluding spaces and hyphens)
+// Determine if a given word is a "non-pattern" word:
+// (contains no repeating letters, excluding spaces and hyphens)
 func IsIsogram(word string) bool {
-	if word == "" {
-		return true
-	}
-	isogram := true
-	letterSet := map[rune]struct{}{}
-	for _, letter := range strings.ToLower(word) {
-		if letter == ' ' || letter == '-' {
-			continue
+	s := strings.ToLower(word)
+
+	for i, letter := range s {
+		if unicode.IsLetter(letter) && strings.ContainsRune(s[i+1:], letter) {
+			return false
 		}
-		_, found := letterSet[letter]
-		if found {
-			isogram = false
-			break
-		}
-		letterSet[letter] = struct{}{}
 	}
-	return isogram
+	return true
 }
