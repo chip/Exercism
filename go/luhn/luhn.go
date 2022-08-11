@@ -2,55 +2,58 @@ package luhn
 
 import (
 	"errors"
+	"log"
 	"regexp"
 	"strconv"
-	"unicode"
-	"unicode/utf8"
 )
 
-// Inspired by (but tweaked):
-// https://stackoverflow.com/questions/1752414/how-to-reverse-a-string-in-go
-// Accepts a string argument and reverse string
-func reverse(s string) string {
-	buf := []byte(s)
-	size := len(buf)
-	for start := 0; start < size; {
-		r, n := utf8.DecodeRuneInString(s[start:])
-		start += n
-		utf8.EncodeRune(buf[size-start:], r)
-	}
-	return string(buf)
+func isDigit(s rune) bool {
+	re := regexp.MustCompile(`^[0-9]+$`)
+	return re.MatchString(string(s))
 }
 
-// Sanitize string by removing whitespace, then check size and contents of
-// buffer, ensuring all digits
-func validate(s string) (string, error) {
+// Sanitize string by removing whitespace
+func sanitize(s string) string {
 	space := regexp.MustCompile(`\s+`)
-	buf := space.ReplaceAllString(s, "")
+	return space.ReplaceAllString(s, "")
+}
 
-	if len(buf) <= 1 {
-		return buf, errors.New("cannot process string because it contains less than 1 character")
+// Validate size and contents of buffer, ensuring all digits
+func validate(s string) error {
+	if len(s) <= 1 {
+		return errors.New("cannot process string because it contains less than 1 character")
 	}
-	for _, char := range buf {
-		if !unicode.IsDigit(char) {
-			return buf, errors.New("cannot process string because it contains non-digits")
+	for _, char := range s {
+		if !isDigit(char) {
+			return errors.New("cannot process string because it contains non-digits")
 		}
 	}
-	return buf, nil
+	return nil
 }
 
 // Determine if string argument provided passes a Luhn algorithm validity check
 // https://en.wikipedia.org/wiki/Luhn_algorithm
 func Valid(id string) bool {
-	s, err := validate(id)
+	s := sanitize(id)
+
+	err := validate(s)
 	if err != nil {
+		log.Println(err)
 		return false
 	}
-	sum := 0
-	for i, r := range reverse(s) {
-		n, _ := strconv.Atoi(string(r))
 
-		if i%2 == 1 {
+	sum := 0
+	counter := 0
+
+	for i := len(s) - 1; i >= 0; i-- {
+		counter++
+		n, err := strconv.Atoi(string(s[i]))
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+
+		if counter%2 == 0 {
 			n *= 2
 			if n > 9 {
 				n -= 9
