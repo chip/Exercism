@@ -37,13 +37,13 @@ func AddSecretIngredient(friendsList []string, myList []string) {
 // amounts for different numbers of portions.
 //
 // Return revised amounts that includes the elements scaled according to their
-// factor (i.e., portions / 2)
+// scaling factor (i.e., portions / 2)
 func ScaleRecipe(amounts []float64, portions int) []float64 {
-	servingsPerAmount := float64(2)
-	factor := float64(portions) / servingsPerAmount
+	servingsPerAmount := 2.0
+	scalingFactor := float64(portions) / servingsPerAmount
 	scaledAmounts := make([]float64, len(amounts))
 	for i, amount := range amounts {
-		scaledAmounts[i] = amount * factor
+		scaledAmounts[i] = amount * scalingFactor
 	}
 	return scaledAmounts
 }
