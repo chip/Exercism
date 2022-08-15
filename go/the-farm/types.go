@@ -13,3 +13,6 @@ type WeightFodder interface {
 
 // ErrScaleMalfunction indicates an error with the scale.
 var ErrScaleMalfunction = errors.New("sensor error")
+
+// ErrNonScaleMalfunction indicates an error unrelated with the scale.
+var ErrNonScaleMalfunction = errors.New("non-scale error")
