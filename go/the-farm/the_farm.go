@@ -1,18 +1,6 @@
 package thefarm
 
-import (
-	"errors"
-	"fmt"
-)
-
 // See types.go for the types defined for this exercise.
-
-var ErrNegativeFodderError = errors.New("negative fodder")
-var ErrDivisionByZeroError = errors.New("division by zero")
-
-func ErrSillyNephewError(cows int) error {
-	return fmt.Errorf("silly nephew, there cannot be %d cows", cows)
-}
 
 // DivideFood computes the fodder amount per cow for the given cows.
 func DivideFood(weightFodder WeightFodder, cows int) (float64, error) {
