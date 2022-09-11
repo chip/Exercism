@@ -5,12 +5,8 @@ import (
 	"log"
 	"regexp"
 	"strconv"
+	"unicode"
 )
-
-func isDigit(s rune) bool {
-	re := regexp.MustCompile(`^[0-9]+$`)
-	return re.MatchString(string(s))
-}
 
 // Sanitize string by removing whitespace
 func sanitize(s string) string {
@@ -24,7 +20,7 @@ func validate(s string) error {
 		return errors.New("cannot process string because it contains less than 1 character")
 	}
 	for _, char := range s {
-		if !isDigit(char) {
+		if !unicode.IsDigit(char) {
 			return errors.New("cannot process string because it contains non-digits")
 		}
 	}
