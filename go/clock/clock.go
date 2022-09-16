@@ -25,9 +25,9 @@ func New(h, m int) Clock {
 				hour--
 			}
 		} else {
-			hour = hoursPerDay + hour - 1
-			if m == 0 {
-				hour++
+			hour = hoursPerDay + hour
+			if m != 0 {
+				hour--
 			}
 		}
 	}
