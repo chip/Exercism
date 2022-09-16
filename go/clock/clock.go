@@ -11,10 +11,8 @@ type Clock struct {
 }
 
 const (
-	hoursPerDay      = 24
-	secondsPerMinute = 60
-	minutesPerHour   = 60
-	secondsPerHour   = secondsPerMinute * minutesPerHour
+	hoursPerDay    = 24
+	minutesPerHour = 60
 )
 
 func New(h, m int) Clock {
@@ -23,6 +21,9 @@ func New(h, m int) Clock {
 	if totalMinutes < 0 {
 		if hour == 0 {
 			hour = hoursPerDay + h
+			if hour == 24 {
+				hour--
+			}
 		} else {
 			hour = hoursPerDay + hour - 1
 			if m == 0 {
@@ -37,16 +38,13 @@ func New(h, m int) Clock {
 }
 
 func (c Clock) Add(m int) Clock {
-	c.minute += m
-	return c
+	return New(c.hour, c.minute+m)
 }
 
 func (c Clock) Subtract(m int) Clock {
-	c.minute -= m
-	return c
+	return New(c.hour, c.minute-m)
 }
 
 func (c Clock) String() string {
-	hour := c.hour
-	return fmt.Sprintf("%02d:%02d", hour, c.minute)
+	return fmt.Sprintf("%02d:%02d", c.hour, c.minute)
 }
