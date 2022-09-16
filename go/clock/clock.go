@@ -19,62 +19,137 @@ const (
 	secondsPerHour   = secondsPerMinute * minutesPerHour
 )
 
-// 2022/09/14 20:12:05 >>>> >>> >>> >>> >>> >>> >>> >>> >>> >>> >>> >>> >> NEW TEST
-// 2022/09/14 20:12:05 h 1
-// 2022/09/14 20:12:05 m -4820
-// 2022/09/14 20:12:05 remainder -80.33333333333333
-// 2022/09/14 20:12:05 hoursFromMinutes -80
-// 2022/09/14 20:12:05 totalHours -55
-// 2022/09/14 20:12:05 hour -7
-// 2022/09/14 20:12:05 hour 2 17
-// 2022/09/14 20:12:05 hour 3 41
-// 2022/09/14 20:12:05 minute -20
-// 2022/09/14 20:12:05 minute < 0 40
+func debug(h, m int) bool {
+	return h == -91 && m == 0
+}
 
-// --- FAIL: TestCreateClock (0.00s)
-//     --- FAIL: TestCreateClock/negative_minutes_roll_over_continuously (0.00s)
-//         clock_test.go:11: New(1, -4820) = "17:40", want "16:40"
 func New(h, m int) Clock {
-	log.Println(">>>> >>> >>> >>> >>> >>> >>> >>> >>> >>> >>> >>> >> NEW TEST")
-	log.Println("h", h)
-	log.Println("m", m)
-	remainder := float64(m) / float64(minutesPerHour)
-	log.Println("remainder", remainder)
-	hoursFromMinutes := remainder
+	totalMinutes := (h * minutesPerHour) + m
+	hour, minute := totalMinutes/minutesPerHour, totalMinutes%minutesPerHour
+	if math.Abs(float64(hour)) >= float64(hoursPerDay) {
+		hour = hour % hoursPerDay
+	}
+	if debug(h, m) {
+		fmt.Println("h", h, "m", m, "hour", hour, "minute", minute, "totalMinutes", totalMinutes)
+	}
+
+	// 	h -1 m 15 hour 0 minute -45 totalMinutes -45
+	// hour % hoursPerDay 0
+	// *** h -1 m 15 hour 25 minute -45 totalMinutes -45
+	// RETURN h -1 m 15 hour 25 minute 15 totalMinutes -45
+	//
+	// --- FAIL: TestCreateClock (0.00s)
+	//     --- FAIL: TestCreateClock/negative_hour (0.00s)
+	//         clock_test.go:11: New(-1, 15) = "01:15", want "23:15"
+	//
+	if totalMinutes < 0 {
+		// hour = hoursPerDay + (hour % hoursPerDay) - h
+		if debug(h, m) {
+			fmt.Println("hour % hoursPerDay", hour%hoursPerDay)
+		}
+		if hour == 0 {
+			if debug(h, m) {
+				fmt.Println("hour == 0")
+			}
+			hour = hoursPerDay + h
+		} else {
+			if debug(h, m) {
+				fmt.Println("else", hour%hoursPerDay)
+			}
+			hour = hoursPerDay + (hour % hoursPerDay) - 1
+			if hour < 0 {
+				if debug(h, m) {
+					fmt.Println("if hour < 0", hour)
+				}
+				// hour--
+			} else {
+				if debug(h, m) {
+					fmt.Println("if hour > 0", hour)
+				}
+				// hour = hoursPerDay + (hour % hoursPerDay) + 1
+				if m == 0 {
+					hour++
+				}
+			}
+		}
+		// hour = hoursPerDay + (hour % hoursPerDay) - h
+	}
+	if debug(h, m) {
+		fmt.Println("*** h", h, "m", m, "hour", hour, "minute", minute, "totalMinutes", totalMinutes)
+	}
+	// if m < 0 && minute != 0 {
+	// 	hour = hoursPerDay - (totalMinutes / minutesPerHour) + 1
+	// 	hour = hoursPerDay + h - (totalMinutes / minutesPerHour) + 1
+	// }
+	// if h < 0 {
+	// 	hour = hour % hoursPerDay
+	// }
+	if minute < 0 {
+		minute += minutesPerHour
+	}
+	if debug(h, m) {
+		fmt.Println("RETURN h", h, "m", m, "hour", hour, "minute", minute, "totalMinutes", totalMinutes)
+		fmt.Println("")
+	}
+	return Clock{hour: hour, minute: minute}
+}
+
+func __New(h, m int) Clock {
+	n := -4820
+	if m == n {
+		log.Println(">>>> >>> >>> >>> >>> >>> >>> >>> >>> >>> >>> >>> >> NEW TEST")
+		log.Println("h", h)
+		log.Println("m", m)
+	}
+	hoursFromMinutes := m / minutesPerHour
+	if m == n {
+		log.Println("hoursFromMinutes", hoursFromMinutes)
+	}
 	if m < 0 {
-		hoursFromMinutes = math.Round(remainder)
+		hoursFromMinutes = int(math.Round(float64(hoursFromMinutes)))
 	}
-	log.Println("hoursFromMinutes", hoursFromMinutes)
-	totalHours := hoursPerDay + h + int(hoursFromMinutes)
-	if h < 0 {
-		totalHours += hoursPerDay
-		// totalHours = int(math.Remainder(float64(h), float64(hoursPerDay)))
+	if m == n {
+		log.Println("hoursFromMinutes", hoursFromMinutes)
 	}
-	log.Println("totalHours", totalHours)
-	hour := int(totalHours % hoursPerDay)
-	log.Println("hour", hour)
+	hour := (h + int(hoursFromMinutes)) % hoursPerDay
+	rem := math.Mod(float64(m), float64(minutesPerHour))
+	if m == n {
+		fmt.Println("math.Mod", rem)
+	}
+
+	if rem < 0 && h > 1 {
+		hour--
+	}
+
+	// hour := int(hoursFromMinutes) % hoursPerDay
+	// if math.Mod(float64(m), float64(minutesPerHour)) < 0 {
+	// 	hour += h
+	// }
+	if m == n {
+		log.Println("hour", hour)
+	}
 	if hour < 0 {
 		hour += hoursPerDay
-		log.Println("hour 2", hour)
+		if m == n {
+			log.Println("hour (part 2):", hour)
+		}
 	}
-	if hoursFromMinutes < 0 {
-		hour += hoursPerDay
-		log.Println("hour 3", hour)
-	}
-	// log.Println("hour 4", hour)
 	minute := int(math.Mod(float64(m), float64(minutesPerHour)))
-	log.Println("minute", minute)
-	// if m < 0.0 {
-	// if math.Signbit(float64(minute)) {
-	if minute < 0 {
-		// minute = int(minutesPerHour + math.Mod(float64(m), float64(minutesPerHour)))
-		minute += minutesPerHour
-		log.Println("minute < 0", minute)
+	if m == n {
+		log.Println("minute", minute)
 	}
-	// if minute < 0 {
-	// 	hour--
+	if minute < 0 {
+		minute += minutesPerHour
+		if m == n {
+			log.Println("minute < 0", minute)
+		}
+		// if h == 1 {
+		// 	hour--
+		// }
+	}
+	// if hoursFromMinutes > float64(int(hoursFromMinutes)) && minute < 0 {
+	// 	hour -= h
 	// }
-
 	return Clock{hour: hour, minute: minute}
 }
 
@@ -90,8 +165,5 @@ func (c Clock) Subtract(m int) Clock {
 
 func (c Clock) String() string {
 	hour := c.hour % 24
-	// if c.hour >= 24 {
-	// 	hour = c.hour % 24
-	// }
 	return fmt.Sprintf("%02d:%02d", hour, c.minute)
 }
