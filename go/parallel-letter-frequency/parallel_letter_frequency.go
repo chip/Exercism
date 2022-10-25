@@ -1,5 +1,7 @@
 package letter
 
+import "fmt"
+
 // FreqMap records the frequency of each rune in a given text.
 type FreqMap map[rune]int
 
@@ -16,5 +18,16 @@ func Frequency(s string) FreqMap {
 // ConcurrentFrequency counts the frequency of each rune in the given strings,
 // by making use of concurrency.
 func ConcurrentFrequency(l []string) FreqMap {
-	panic("Implement the ConcurrentFrequency function")
+	var s string
+	for _, r := range l {
+		s += r
+	}
+	go Frequency(s)
+
+	// var input string
+	// fmt.Scanln(&input)
+	var m FreqMap{}
+	fmt.Scanln(&m)
+
+	return m
 }
