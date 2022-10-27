@@ -3,7 +3,7 @@
 (provide square total)
 
 (define (square a-square)
-  (error "Not implemented yet"))
+  (expt 2 (- a-square 1)))
 
 (define (total)
-  (error "Not implemented yet"))
+  (- (square 65) 1))
