@@ -2,8 +2,8 @@
 
 (provide square total)
 
-(define (square a-square)
-  (expt 2 (- a-square 1)))
+(define (square n)
+  (expt 2 (sub1 n)))
 
 (define (total)
-  (- (square 65) 1))
+  (sub1 (square 65)))
