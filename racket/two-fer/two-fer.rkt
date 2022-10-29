@@ -2,7 +2,5 @@
 
 (provide two-fer)
 
-(define two-fer
-  (case-lambda
-    [() (two-fer "you")]
-    [(name) (string-append "One for " name ", one for me.")]))
+(define (two-fer [name "you"])
+  (format "One for ~a, one for me." name))
