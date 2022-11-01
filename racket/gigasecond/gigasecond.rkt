@@ -1,8 +1,10 @@
 #lang racket
 
-(require racket/date)
-
 (provide add-gigasecond)
 
+(require racket/date)
+
+(define gigasecond 1000000000)
+
 (define (add-gigasecond datetime)
-  (seconds->date (+ (expt 10 9) (date->seconds datetime))))
+  (seconds->date (+ gigasecond (date->seconds datetime))))
