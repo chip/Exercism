@@ -5,4 +5,4 @@
 (provide add-gigasecond)
 
 (define (add-gigasecond datetime)
-  (error "Not implemented yet"))
+  (seconds->date (+ (expt 10 9) (date->seconds datetime))))
