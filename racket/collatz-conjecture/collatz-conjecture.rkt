@@ -2,19 +2,13 @@
 
 (provide collatz)
 
-(define steps 0)
-
-(define (collatz num)
-  (cond 
-    [(zero? num) (error exn:fail #t)]
-    [(negative? num) (error exn:fail #t)]
-    [(not (integer? num)) (error exn:fail #t)]
-    [(= 1 num) (let ([result steps])
-                 (set! steps 0)
-                 result)]
-    [else
-      (set! steps (add1 steps))
-      (cond
-        [(even? num) (collatz (/ num 2))]
-        [(odd? num) (collatz (add1 (* num 3)))]
-        [else (error exn:fail #t)])]))
+(define collatz
+  (case-lambda
+    [(n) (if (exact-positive-integer? n)
+             (collatz n 0)
+             (error "Value must be a positive integer"))]
+    [(n total)
+     (cond
+      [(= n 1) total]
+      [(even? n) (collatz (/ n 2) (add1 total))]
+      [else (collatz (add1 (* n 3)) (add1 total))])]))
