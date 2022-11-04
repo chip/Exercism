@@ -2,19 +2,19 @@
 
 (provide score)
 
-(define (lookup byte)
-  (let ([letter (string-upcase (string byte))])
+(require math/base)
+
+(define (char->score byte)
+  (let ([c (string byte)])
     (cond 
-      [(regexp-match? #rx"[AEIOULNRST]" letter) 1]
-      [(regexp-match? #rx"[DG]" letter) 2]
-      [(regexp-match? #rx"[BCMP]" letter) 3]
-      [(regexp-match? #rx"[FHVWY]" letter) 4]
-      [(regexp-match? #rx"[K]" letter) 5]
-      [(regexp-match? #rx"[JX]" letter) 8]
-      [(regexp-match? #rx"[QZ]" letter) 10]
+      [(string-contains? "AEIOULNRST" c) 1]
+      [(string-contains? "DG" c) 2]
+      [(string-contains? "BCMP" c) 3]
+      [(string-contains? "FHVWY" c) 4]
+      [(string-contains? "K" c) 5]
+      [(string-contains? "JX" c) 8]
+      [(string-contains? "QZ" c) 10]
       [else 0])))
 
 (define (score word)
-  (if (zero? (string-length word))
-    0
-    (for/sum ([i (map (lambda (byte) (lookup byte)) (string->list word))]) i)))
+  (sum (map char->score (string->list (string-upcase word)))))
