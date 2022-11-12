@@ -3,7 +3,7 @@
 (require racket/contract)
 (require racket/list)
 (require racket/string)
-(require (only-in math/number-theory coprime? pairwise-coprime?))
+(require (only-in math/number-theory coprime?))
 
 (provide (contract-out
           [encode (string?
@@ -13,35 +13,26 @@
                    exact-nonnegative-integer?
                    exact-nonnegative-integer? . -> . string?)]))
 
-(define n-chars 5)
 (define m 26)
 (define ascii-offset 97)
-(define ascii-offset-numbers 48)
-(define fmt "c: ~v, i: ~v, x: ~v, p: ~v, r: ~v, z: ~v")
+(define n-chars 5)
 
-; `E(x) = (ax + b) mod m`)
-(define (Ex c a b)
-  (if (not (pairwise-coprime? a m))
-    (raise-argument-error "a is not coprime to m")
-    (if (char-numeric? c)
-      c
-      (let* ([i (char->integer c)]
+(define (encode-character char a b)
+  (if (not (coprime? a m))
+    (raise-argument-error "a and b must be coprime.")
+    (if (char-numeric? char)
+      char
+      (let* ([i (char->integer char)]
              [x (- i ascii-offset)]
              [p (+ (* a x) b)]
              [r (remainder p m)]
              [z (integer->char (+ r ascii-offset))])
-        ;(if (equal? c "a")
-        ;  (displayln (format fmt c i x p r z))
-        ;  ""
-        (if (integer? x)
-          z
-          c)))))
+          z))))
     
 (define (add-whitespace lst)
-  (if (>= (length lst) n-chars)
-    (flatten
-      (list (take lst n-chars) #\space (add-whitespace (drop lst n-chars))))
-    lst))
+  (if (< (length lst) n-chars)
+    lst
+    (flatten (list (take lst n-chars) #\space (add-whitespace (drop lst n-chars))))))
         
 (define (allowed? c)
   (cond
@@ -53,7 +44,20 @@
   (filter allowed? (string->list (string-downcase msg))))
 
 (define (encode msg a b)
-  (string-trim (list->string (add-whitespace (map (lambda (c) (Ex c a b)) (characters msg))))))
+  (string-trim (list->string (add-whitespace (map (lambda (char) (encode-character char a b)) (characters msg))))))
+
+(define (mmi a)
+ (first (filter exact-positive-integer? (map (lambda (i) (/ (+ (* i m) 1) a)) (range 1 m)))))
+
+(define (decode-character char a b)
+  (if (char-numeric? char)
+    (string char)
+    (let* ([y (- (char->integer char) ascii-offset)]
+           [rem (modulo (* (mmi a) (- y b)) m)]
+           [orig (integer->char (+ ascii-offset rem))])
+      (string orig))))
 
 (define (decode msg a b)
-  (error "Not implemented yet"))
+  (if (not (coprime? a m))
+    (raise-argument-error "a and b must be coprime.")
+    (string-join (map (lambda (char) (decode-character char a b)) (filter allowed? (string->list msg))) "")))
