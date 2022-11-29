@@ -25,7 +25,7 @@
 
 (define (normalize-score score)
   (if (> score 256)
-    (modulo score 128)
+    (modulo score 256)
     score))
 
 (define (list-allergies orig-score)
@@ -37,7 +37,8 @@
         (if (not allergy)
           lst
           (let ([allergy-score (hash-ref allergy-names allergy)])
-            (unless (zero? allergy-score)
+            (if (zero? allergy-score)
+              lst
               (process (append lst (list allergy)) (- score allergy-score)))))))))
 
 (define (allergic-to? str score)
