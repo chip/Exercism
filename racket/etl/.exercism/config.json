@@ -1,0 +1,22 @@
+{
+  "blurb": "We are going to do the `Transform` step of an Extract-Transform-Load.",
+  "authors": [],
+  "contributors": [
+    "arguello",
+    "PurityControl",
+    "yurrriq"
+  ],
+  "files": {
+    "solution": [
+      "etl.rkt"
+    ],
+    "test": [
+      "etl-test.rkt"
+    ],
+    "example": [
+      ".meta/example.rkt"
+    ]
+  },
+  "source": "Exercise by the JumpstartLab team for students at The Turing School of Software and Design.",
+  "source_url": "https://turing.edu"
+}
