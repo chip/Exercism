@@ -2,15 +2,13 @@
 
 (provide etl)
 
-(define scores (hash 'a 1 'e 1 'i 1 'o 1 'u 1 'l 1 'n 1 'r 1 's 1 't 1
-                      'd 2 'g 2
-                      'b 3 'c 3 'm 3 'p 3
-                      'f 4 'h 4 'v 4 'w 4 'y 4
-                      'k 5
-                      'j 8 'x 8
-                      'q 10 'z 10))
-
-(hash-ref scores (string-ref "z" 0))
+(define scores (hash "a" 1 "e" 1 "i" 1 "o" 1 "u" 1 "l" 1 "n" 1 "r" 1 "s" 1 "t" 1
+                     "d" 2 "g" 2
+                     "b" 3 "c" 3 "m" 3 "p" 3
+                     "f" 4 "h" 4 "v" 4 "w" 4 "y" 4
+                     "k" 5
+                     "j" 8 "x" 8
+                     "q" 10 "z" 10))
 
 (define (negative-keys? input)
   (not (empty? (filter negative-integer? (hash-keys input)))))
@@ -22,13 +20,8 @@
   (map string-downcase (filter string? (flatten (hash-values input)))))
 
 (define (convert input)
-  (let ([h (make-hash)])
-    (for ([s (hash->strings input)])
-      (let* ([x (string-ref s 0)]
-             [score (hash-ref scores x)])
-        (printf "x: ~a\n" x)
-        (hash-update! h x score)))
-    h))
+  (for/hash ([s (hash->strings input)])
+    (values s (hash-ref scores s))))
 
 (define (etl input)
   (if (hash-empty? input)
