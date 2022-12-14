@@ -15,50 +15,36 @@
   (define (invert-match? flags)
     (member "-v" flags))
 
+  (define (multiple-files? flags)
+    (> (length files) 0))
+ 
   (define (show-filename? flags)
-    (member "-l" flags))
-
-  (define (case-i-re pattern)
-    (regexp (string-append "(?i:" pattern ")")))
-
-  (define (line-re pattern)
-    (regexp (string-append "^" pattern "$")))
-
-  (define (re pattern)
-    (regexp pattern))
+    (or (member "-l" flags) (multiple-files? flags)))
 
   (define (regex pattern flags)
-    (cond [(case-insensitive? flags) (case-i-re pattern)]
-          [(match-line? flags) (line-re pattern)]
-          [else (re pattern)]))
+    (cond [(case-insensitive? flags) (regexp (string-append "(?i:" pattern ")"))]
+          [(match-line? flags) (regexp (string-append "^" pattern "$"))]
+          [else (regexp pattern)]))
 
-  (define (display-line flags file line n)
-    (cond [(show-line-numbers? flags) (format "~a:~a" n line)]
-          [(show-filename? flags) (format "file: ~a" file)]
-          [else (format "~a" line)]))
-
-  (define (line-matches? line pattern flags)
-    (let* ([rx (regex pattern flags)]
-           [r (regexp-match rx line)])
-      #| (printf "rx: ~a\t~a\n" rx line) |#
+  (define (show-line? line pattern flags)
+    (if (invert-match? flags)
+      (not (regexp-match (regex pattern flags) line))
       (regexp-match (regex pattern flags) line)))
 
-  (define (lines file pattern flags)
+  (define (show-line flags file line n)
+    (cond [(multiple-files? flags) (format "~a" file)]
+          [(show-filename? flags) (format "~a" file)]
+          [(show-line-numbers? flags) (format "~a:~a" n line)]
+          [else (format "else: ~a" line)]))
+
+  (define (process file pattern flags)
     (define file-lines
       (file->lines (build-path (current-directory) file)))
     (for/list ([line file-lines]
-               [n (range 1 (length file-lines))]
-               #:when (line-matches? line pattern flags))
-      (let ([dl (display-line flags file line n)])
-        dl)))
+               [n (range 1 (add1 (length file-lines)))]
+               #:when (show-line? line pattern flags))
+      (show-line flags file line n)))
 
-  (define (process file pattern flags)
-    (let ([b (lines file pattern flags)])
-      b))
+  (flatten (map (lambda (file) (process file pattern flags)) files)))
 
-  (for/list ([file files])
-    (let ([p (process file pattern flags)])
-      (printf "file: ~a\t pattern: ~a\tflags: ~a\tp: ~a\n" file pattern flags p)
-      (if (empty? p)
-        p
-        (first p)))))
+;(grep '("-x") "Eden" '("paradise-lost.txt"))
