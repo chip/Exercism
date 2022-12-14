@@ -9,16 +9,37 @@
          my-concatenate)
 
 (define (my-length sequence)
-  (error "Not implemented yet"))
+  (let loop ([sequence sequence]
+             [sum 0])
+    (if (empty? sequence)
+      sum
+      (loop (rest sequence) (add1 sum))))) 
 
 (define (my-reverse sequence)
-  (error "Not implemented yet"))
+  (let loop ([sequence sequence]
+             [lst empty])
+    (if (empty? sequence)
+      (flatten lst) 
+      (loop (drop-right sequence 1)
+            (append (list lst) (list (last sequence))))))) 
 
 (define (my-map operation sequence)
-  (error "Not implemented yet"))
+  (let loop ([sequence sequence]
+             [lst empty])
+    (if (empty? sequence)
+      (flatten lst) 
+      (let* ([x (first sequence)]
+             [result (operation x)])
+        (loop (rest sequence) (append (list lst) (list result)))))))
 
 (define (my-filter operation? sequence)
-  (error "Not implemented yet"))
+  (let loop ([sequence sequence]
+             [lst empty])
+    (if (empty? sequence)
+      (flatten lst) 
+      (if (operation? (first sequence))
+        (loop (rest sequence) (append (list lst) (first sequence)))
+        (loop (rest sequence) (list lst))))))
 
 (define (my-fold operation accumulator sequence)
   (error "Not implemented yet"))
