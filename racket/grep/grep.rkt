@@ -60,18 +60,15 @@
   (define (process file pattern flags)
     (define file-lines
       (file->lines (build-path (current-directory) file)))
-    (define matches empty)
-    (filter (lambda (s)
-              (not (void? s)))
-      (flatten
-        (map (lambda (line n)
-               (let ([ln (show-line flags file line n)])
-                 #| (printf (list->string matches)) |#
-                 #| (printf ln) |#
-                 ;(when (and (show-line? line pattern flags) (not (member ln matches))))
-                 (when (show-line? line pattern flags)
-                   ln)))
-             file-lines (range 1 (add1 (length file-lines)))))))
+    (remove-duplicates
+      (filter (lambda (s)
+                (not (void? s)))
+        (flatten
+          (map (lambda (line n)
+                 (let ([ln (show-line flags file line n)])
+                   (when (show-line? line pattern flags)
+                     ln)))
+               file-lines (range 1 (add1 (length file-lines))))))))
 
   (flatten
     (map (lambda (file)
