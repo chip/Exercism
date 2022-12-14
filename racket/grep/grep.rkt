@@ -15,47 +15,42 @@
   (define (invert-match? flags)
     (member "-v" flags))
 
-  (define (multiple-files? flags)
-    (> (length files) 0))
- 
   (define (show-filename? flags)
     (member "-l" flags))
 
+  (define (rx pattern [start ""] [end ""])
+    (regexp (string-append start pattern end)))
+
   (define (regex pattern flags)
-    (cond 
-          [(and (case-insensitive? flags) (match-line? flags)) (regexp (string-append "^(?i:" pattern ")$"))]
-          [(case-insensitive? flags) (regexp (string-append "(?i:" pattern ")"))]
-          [(match-line? flags) (regexp (string-append "^" pattern "$"))]
-          [else (regexp pattern)]))
+    (let ([ci? (case-insensitive? flags)]
+          [ml? (match-line? flags)])
+      (cond 
+        [(and ci? ml?) (rx pattern "^(?i:" ")$")]
+        [ci? (rx pattern "(?i:" ")")]
+        [ml? (rx pattern "^" "$")]
+        [else (rx pattern)])))
 
   (define (show-line? line pattern flags)
-    (if (invert-match? flags)
-      (not (regexp-match (regex pattern flags) line))
-      (regexp-match (regex pattern flags) line)))
+    (let ([match? (regexp-match (regex pattern flags) line)])
+      (if (invert-match? flags)
+        (not match?)
+        match?)))
 
   (define (format-line-single-file flags file line n)
-    ;(printf "s flags: ~a\n" flags)
     (cond
-          [(show-filename? flags) (format "~a" file)]
-          [(show-line-numbers? flags) (format "~a:~a" n line)]
-          ;[(and (multiple-files? flags) (show-line-numbers? flags)) (format "~a:~a:~a" file n line)]
-          ;[(multiple-files? flags) (format "~a" line)]
-          [else (format "~a" line)]))
+      [(show-line-numbers? flags) (format "~a:~a" n line)]
+      [else (format "~a" line)]))
 
   (define (format-line-multiple-files flags file line n)
-    ;(printf "mult flags: ~a\n" flags)
     (cond
-          [(show-filename? flags) (format "~a" file)]
-          [(show-line-numbers? flags) (format "~a:~a:~a" file n line)]
-          ;[(and (multiple-files? flags) (show-line-numbers? flags)) (format "~a:~a:~a" file n line)]
-          ;[(multiple-files? flags) (format "~a" line)]
-          ;[else (format "~a" line)]
-          [else (format "~a:~a" file line)]))
+      [(show-line-numbers? flags) (format "~a:~a:~a" file n line)]
+      [else (format "~a:~a" file line)]))
 
   (define (show-line flags file line n)
     (cond
-          [(= 1 (length files)) (format-line-single-file flags file line n)]
-          [else (format-line-multiple-files flags file line n)]))
+      [(show-filename? flags) (format "~a" file)]
+      [(= 1 (length files)) (format-line-single-file flags file line n)]
+      [else (format-line-multiple-files flags file line n)]))
 
   (define (process file pattern flags)
     (define file-lines
@@ -65,12 +60,8 @@
                 (not (void? s)))
         (flatten
           (map (lambda (line n)
-                 (let ([ln (show-line flags file line n)])
-                   (when (show-line? line pattern flags)
-                     ln)))
+                 (when (show-line? line pattern flags)
+                   (show-line flags file line n)))
                file-lines (range 1 (add1 (length file-lines))))))))
 
-  (flatten
-    (map (lambda (file)
-           (process file pattern flags))
-         files)))
+  (flatten (map (lambda (file) (process file pattern flags)) files)))
