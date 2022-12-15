@@ -19,9 +19,9 @@
   (let loop ([sequence sequence]
              [lst empty])
     (if (empty? sequence)
-      (flatten lst) 
-      (loop (drop-right sequence 1)
-            (append (list lst) (list (last sequence))))))) 
+      lst
+      (let ([n (first sequence)])
+        (loop (rest sequence) (append (list n) lst)))))) 
 
 (define (my-map operation sequence)
   (let loop ([sequence sequence]
@@ -42,10 +42,14 @@
         (loop (rest sequence) (list lst))))))
 
 (define (my-fold operation accumulator sequence)
-  (error "Not implemented yet"))
+  (let loop ([accumulator accumulator]
+             [sequence sequence])
+    (if (empty? sequence)
+      accumulator
+      (loop (operation (first sequence) accumulator) (rest sequence)))))
 
 (define (my-append sequence1 sequence2)
-  (error "Not implemented yet"))
+  (flatten (cons sequence1 sequence2)))
 
 (define (my-concatenate sequence-of-sequences)
-  (error "Not implemented yet"))
+  (flatten sequence-of-sequences))

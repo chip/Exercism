@@ -20,9 +20,9 @@
                 (my-length '(1 3 5 7))
                 4)
 
-     ;(test-eqv? "length of huge list"
-     ;           (my-length (build-list 1000000 values))
-     ;           1000000)
+     (test-eqv? "length of huge list"
+                (my-length (build-list 1000000 values))
+                1000000)
 
      (test-equal? "reverse of empty list"
                   (my-reverse '())
@@ -32,9 +32,9 @@
                   (my-reverse '(1 3 5 7))
                   '(7 5 3 1))
 
-     ;(test-equal? "reverse of huge list"
-     ;             (my-reverse (build-list 1000000 values))
-     ;             (build-list 1000000 (lambda (x) (- 999999 x))))
+     (test-equal? "reverse of huge list"
+                  (my-reverse (build-list 1000000 values))
+                  (build-list 1000000 (lambda (x) (- 999999 x))))
 
      (test-equal? "map of empty list"
                   (my-map inc '())
@@ -44,9 +44,9 @@
                   (my-map inc '(1 2 3 4))
                   '(2 3 4 5))
 
-     ;(test-equal? "map of huge list"
-     ;             (my-map inc (build-list 1000000 values))
-     ;             (build-list 1000000 (lambda (x) (+ x 1))))
+     (test-equal? "map of huge list"
+                  (my-map inc (build-list 1000000 values))
+                  (build-list 1000000 (lambda (x) (+ x 1))))
 
      (test-equal? "filter of empty list"
                   (my-filter odd? '())
@@ -56,9 +56,9 @@
                   (my-filter odd? '(1 2 3 4))
                   '(1 3))
 
-     ;(test-equal? "filter of huge list"
-     ;             (my-filter odd? (build-list 1000000 values))
-     ;             (filter odd? (build-list 1000000 values)))
+     (test-equal? "filter of huge list"
+                  (my-filter odd? (build-list 1000000 values))
+                  (filter odd? (build-list 1000000 values)))
 
      (test-eqv? "fold of empty list"
                 (my-fold + 0 '())
@@ -68,9 +68,9 @@
                 (my-fold + -3 '(1 2 3 4))
                 7)
 
-     ;(test-eqv? "fold of huge list"
-     ;           (my-fold + 0 (build-list 1000000 values))
-     ;           (foldl + 0 (build-list 1000000 values)))
+     (test-eqv? "fold of huge list"
+                (my-fold + 0 (build-list 1000000 values))
+                (foldl + 0 (build-list 1000000 values)))
 
      (test-eqv? "fold with non-commutative function"
                 (my-fold (lambda (x acc) (- acc x)) 10 '(1 2 3 4))
@@ -92,10 +92,10 @@
                   (my-append '(1 2 3) '(4 5))
                   '(1 2 3 4 5))
 
-     ;(test-equal? "append of huge lists"
-     ;             (my-append (build-list 1000000 values)
-     ;                        (build-list 1000000 (lambda (x) (+ x 1000000))))
-     ;             (build-list 2000000 values))
+     (test-equal? "append of huge lists"
+                  (my-append (build-list 1000000 values)
+                             (build-list 1000000 (lambda (x) (+ x 1000000))))
+                  (build-list 2000000 values))
 
      (test-equal? "concatenate of empty list of lists"
                   (my-concatenate '())
@@ -103,17 +103,17 @@
 
      (test-equal? "concatenate of normal list of lists"
                   (my-concatenate '((1 2) (3) () (4 5 6)))
-                  '(1 2 3 4 5 6))))
+                  '(1 2 3 4 5 6))
 
-     ;(test-equal? "concatenate of huge list of small lists"
-     ;             (my-concatenate (build-list 1000000 list))
-     ;             (build-list 1000000 values))
+     (test-equal? "concatenate of huge list of small lists"
+                  (my-concatenate (build-list 1000000 list))
+                  (build-list 1000000 values))
 
-     ;(test-equal? "concatenate of small list of huge lists"
-     ;             (my-concatenate
-     ;              (build-list 10 (lambda (i)
-     ;                               (build-list 100000 (lambda (j)
-     ;                                                    (+ (* 100000 i) j))))))
-     ;             (build-list 1000000 values))))
+     (test-equal? "concatenate of small list of huge lists"
+                  (my-concatenate
+                   (build-list 10 (lambda (i)
+                                    (build-list 100000 (lambda (j)
+                                                         (+ (* 100000 i) j))))))
+                  (build-list 1000000 values))))
 
   (run-tests suite))
