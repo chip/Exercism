@@ -32,25 +32,35 @@
 
 ; Then convert 'first, 'second, etc. to analagous racket fns (SPECIAL CASE: 'teenth)
 (define (get-date year month day weekday)
-  (let* ([date (seconds->date (find-seconds 0 0 0 day month year #t))]
+  (let* ([date (seconds->date (find-seconds 0 0 0 day month year #f) #f)]
          [current-weekday (vector-ref days-of-week (date-week-day date))])
     (if (equal? current-weekday weekday)
       date
       #f)))
 
-(define (matches-week-day date)
-  (if (member (date-week-day date) teens)
+(define (teenth-date? date)
+  #| (printf "teenth-date? date-day ~a\tmember? ~a\tdate: ~a\n" (date-day date) (member (date-day date) teens) date) |#
+  (if (member (date-day date) teens)
     date
     #f))
 
+(define (day-range year month)
+  (sequence->list (in-inclusive-range 1 (last-day-of-month year month))))
+
 (define (matching-days year month weekday week-of-month)
-  (let* ([last-day (last-day-of-month year month)] ; TODO extract
-         [day-range (sequence->list (in-inclusive-range 1 last-day))])
-    (filter-map (lambda (day) (get-date year month day weekday)) day-range)))
+  (filter-map (lambda (day) (get-date year month day weekday)) (day-range year month)))
+
+(define (find-teenth matching-dates)
+  (first (filter-map teenth-date? matching-dates)))
+
+(define (find-match matching-dates fn)
+  (filter-map fn matching-dates))
 
 (define (meetup-day year month weekday week-of-month)
-  (printf "meetup-day: ~a\t~a\t~a\t~a\n" year month weekday week-of-month)
+  ;(printf "meetup-day: ~a\t~a\t~a\t~a\n" year month weekday week-of-month)
   (let ([matches (matching-days year month weekday week-of-month)])
-    (printf "matches: ~a\n" matches)))
+    ;(printf "matches: ~a\n" matches)
+    (cond [(equal? week-of-month 'teenth) (find-teenth matches)]
+          [(find-match matches week-of-month)])))
 #| (check-equal? (meetup-day 2013 5 'Monday 'teenth)) |#
 #| (printf "d: ~a\n" (date->string (make-date 2013 5 13))) |#
