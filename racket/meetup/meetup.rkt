@@ -4,39 +4,22 @@
 
 (require racket/date)
 
-#| (define seconds-per-minute 60) |#
-#| (define minutes-per-hour 60) |#
-#| (define hours-per-day 24) |#
-#| (define seconds-per-day (* seconds-per-minute minutes-per-hour hours-per-day)) |#
-#| (define days-per-week 7) |#
-#||#
-(define (meetup-day year month weekday week-of-month)
-  (error 'not-implemented))
-#|   (let loop ([day 1] ))|#
-#|              [current-month month] |#
-#|     (let* ([seconds (find-seconds 0 0 0 day current-month year #t)])) |#
-#|            [current-date (seconds->date seconds)] |#
-#|       (when (eq? current-month (date-month current-date))) |#
-#|         (printf "~a\n" (date->string current-date)) |#
-#|         (loop (add1 day) current-month) |#
-#|     day |#
-#||#
-;(meetup-day 2013 5 'Monday 'teenth) |#
-; (with-handlers ([exn:fail:contract:divide-by-zero? (lambda (exn) +inf.0)]) (/ 1 0))
+(define days-of-week #(Sunday Monday Tuesday Wednesday Thursday Friday Saturday))
+(define teens (sequence->list (in-inclusive-range 13 19)))
 
-(define (___find-last-day year month day)
-  (let ([date (seconds->date (find-seconds 0 0 0 day month year #t))])
-    (printf "DATE: ~a\tday: ~a\tmonth: ~a\tcurrent-month: ~a\n" (date->string date) day month (date-month date))
-    (when (eq? month (date-month date))
-      day)))
+(define (make-seconds year month day)
+  (find-seconds 0 0 0 day month year #f))
+
+(define (make-date year month day)
+  (seconds->date (make-seconds day month year #f) #f))
 
 (define (find-last-day year month day)
   (with-handlers ([exn:fail? (lambda (exn) #f)]) 
     (if (find-seconds 0 0 0 day month year #t)
+    ;(if (make-date day month year) ; TODO REVISIT
       day
       #f)))
 
-;(find-last-day 2023 2 31)
 (define (last-day-of-month year month)
   (last
     (filter-map
@@ -45,32 +28,29 @@
         (find-last-day year month day))
       '(28 29 30 31))))
 
-(printf "ldom: ~a\n" (last-day-of-month 2014 2))
+;(printf "ldom: ~a\n" (last-day-of-month 2014 2))
 
-;(let ([day 31]
-;      [month 2]
-;      [year 2023]
-;  (find-seconds 0 0 0 day month year #t))
+; Then convert 'first, 'second, etc. to analagous racket fns (SPECIAL CASE: 'teenth)
+(define (get-date year month day weekday)
+  (let* ([date (seconds->date (find-seconds 0 0 0 day month year #t))]
+         [current-weekday (vector-ref days-of-week (date-week-day date))])
+    (if (equal? current-weekday weekday)
+      date
+      #f)))
 
+(define (matches-week-day date)
+  (if (member (date-week-day date) teens)
+    date
+    #f))
 
-;(find-seconds 0 0 0 31 2 2023 #t)
-;; Given a day, month, and year, return the weekday
-#|   (define (day-month-year->weekday day month year)) |#
-#|     (define local-secs (find-seconds 0)) |#
-#|                                      0 |#
-#|                                      0 |#
-#|                                      day |#
-#|                                      month |#
-#|                                      year |#
-#|                                      #t |#
-#|     (define the-date (seconds->date local-secs)) |#
-#|     (vector-ref #("sunday" "monday" "tuesday" "wednesday" "thursday")) |#
-#|                            "friday" "saturday" |#
-#|                 (date-week-day the-date) |#
-#| > (day-month-year->weekday 15 12 2022) |#
-#| "thursday" |#
-#| > (define s (find-seconds 0 0 0 16 12 2022 #t)) |#
-#| > (define d (seconds->date s)) |#
-#| > (date-week-day d) |#
+(define (matching-days year month weekday week-of-month)
+  (let* ([last-day (last-day-of-month year month)] ; TODO extract
+         [day-range (sequence->list (in-inclusive-range 1 last-day))])
+    (filter-map (lambda (day) (get-date year month day weekday)) day-range)))
+
+(define (meetup-day year month weekday week-of-month)
+  (printf "meetup-day: ~a\t~a\t~a\t~a\n" year month weekday week-of-month)
+  (let ([matches (matching-days year month weekday week-of-month)])
+    (printf "matches: ~a\n" matches)))
 #| (check-equal? (meetup-day 2013 5 'Monday 'teenth)) |#
-#|              (make-date 2013 5 13) |#
+#| (printf "d: ~a\n" (date->string (make-date 2013 5 13))) |#
