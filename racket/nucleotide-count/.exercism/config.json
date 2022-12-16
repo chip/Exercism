@@ -1,0 +1,24 @@
+{
+  "authors": [
+    "arguello"
+  ],
+  "contributors": [
+    "mbertheau",
+    "PurityControl",
+    "yurrriq"
+  ],
+  "files": {
+    "solution": [
+      "nucleotide-count.rkt"
+    ],
+    "test": [
+      "nucleotide-count-test.rkt"
+    ],
+    "example": [
+      ".meta/example.rkt"
+    ]
+  },
+  "blurb": "Given a DNA string, compute how many times each nucleotide occurs in the string.",
+  "source": "The Calculating DNA Nucleotides_problem at Rosalind",
+  "source_url": "https://rosalind.info/problems/dna/"
+}
