@@ -2,31 +2,22 @@
 
 (provide nucleotide-counts)
 
-(define nucleotides (make-hash))
-
-(define (reset-count)
-  (for ([char (list #\A #\C #\G #\T)])
-    (hash-set! nucleotides char 0)))
-
-(define (hash->list)
-  (printf "hash->list\n")
-  (for/list ([key (sort (hash-keys nucleotides) char<?)])
-    (cons key (hash-ref nucleotides key))))
-    
 (define (parse s)
-  (printf "parse\n")
+  (define nucleotides (make-hash))
+  (for ([char (list #\A #\C #\G #\T)])
+    (hash-set! nucleotides char 0))
   (for ([char (string->list s)])
     (let ([n (hash-ref nucleotides char)])
       (hash-set! nucleotides char (add1 n))))
-  (hash->list)) 
+  (for/list ([key (sort (hash-keys nucleotides) char<?)])
+    (cons key (hash-ref nucleotides key))))
 
 (define (valid? s)
-  (regexp-match? #rx"^[ACGT]+$" s))
+  (if (non-empty-string? s)
+    (regexp-match? #rx"^[ACGT]+$" s)
+    #t))
 
 (define (nucleotide-counts s)
-  (reset-count)
-  (if (not (valid? s))
-    (error "invalid nucleotides")
-    (if (non-empty-string? s)
-      (parse s)
-      (hash->list))))
+  (when (not (valid? s))
+    (error "invalid nucleotides"))
+  (parse s))
