@@ -2,4 +2,6 @@
 (provide my-reverse)
 
 (define (my-reverse s)
-  (error "Not implemented yet"))
+  (foldr (lambda (c acc) (string-append acc (string c)))
+         ""
+         (string->list s)))
