@@ -10,7 +10,5 @@
              [rn ""])
     (if (= n 0)
       rn
-      (let ([d (first (filter (lambda (x)
-                                (>= n x)) divisors))])
-        (let ([ndx (index-of divisors d)])
-          (loop (- n d) (string-append rn (list-ref numerals ndx))))))))
+      (let* ([amt (first (filter (lambda (d) (>= n d)) divisors))])
+        (loop (- n amt) (string-append rn (list-ref numerals (index-of divisors amt))))))))
