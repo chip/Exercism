@@ -39,11 +39,19 @@
 
 (define tens (vector "ZERO" "TEN" "twenty" "thirty" "forty" "fifty" "sixty" "seventy" "eighty" "ninety"))
 
+(define (charlist->num lst)
+  (displayln (format "[charlist->num] ~a\n" lst))
+  (string->number (string-join (map string lst) "")))
+
+;(define (num->charlist n)
+;  (displayln (format "[num->charlist] n ~a\n" n))
+;  (map string->number (map string (string->list (number->string n)))))
+
 (define (convert n)
   (if (= 0 n)
     ""
     (begin
-      ;(displayln (format "[convert 1] n ~a\n" n))
+      (displayln (format "[convert 1] n ~a\n" n))
       (let ([lst (map string->number (map string (string->list (number->string n))))])
         ;(displayln (format "[convert 2] lst: ~a\tpair? ~a\n" lst (pair? lst)))
         (let ([x (first lst)]
@@ -52,6 +60,37 @@
           (if (> y 0)
             (string-append (vector-ref tens x) "-" (vector-ref under-20 y))
             (string-append (vector-ref tens x))))))))
+
+(define (char->n c)
+  (string->number (string c)))
+
+; accept number arg
+; convert 2-digit numbers
+; handle 3-digit numbers by splitting into 1 digit for hundreds, remaining 2 digits to be called using convert
+(define (conv n)
+  (printf "[conv] n ~a\n" n)
+  (if (= 0 n)
+    ""
+    (let ([s (number->string n)])
+      (let ([lst (string->list s)])
+        (printf "lst: ~a\ts: ~a\n" lst s)
+        (match lst
+          [(list a b c) (string-append (conv (char->n a)) " hundred and " (conv (charlist->num (list b c))))]
+          [(list a b) (let ([x (char->n a)]
+                            [y (char->n b)])
+                        (cond [(= 0 x) (vector-ref under-20 y)]
+                              [(= 0 y) (vector-ref tens x)]
+                              [else (string-append (vector-ref tens x) "-" (vector-ref under-20 y))]))]
+          [(list a) (vector-ref under-20 n)])))))
+
+(conv 700) ; TODO Remove " and"
+(conv 14) ; becomes "fourteen". TODO Fix
+(conv 100) ; becomes "one hundred".
+(conv 120) ; becomes "one hundred and twenty".
+(conv 1002) ; becomes "one thousand and two". TODO Handle n w/ 3 or more digits
+(conv 1323) ; becomes "one thousand three hundred and twenty-three". TODO see above
+(conv 1234567890) ; should yield `'1 billion 234 million 567 thousand 890'` TODO see above
+(conv 12345); should give `twelve thousand three hundred forty-five`. TODO see above
 
 (define (convert-3-digits n)
   (let ([s (number->string n)])
