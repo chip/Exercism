@@ -103,35 +103,61 @@
 
 (define (step3 n)
   (let ([lst (step2 n)])
-    #| (displayln (format "step3 lst: ~a\n" lst)) |#
+    ;(displayln (format "step3 lst: ~a\n" lst))
     (match lst
       [(list b m t h) (list (cons b 'billion) (cons m 'million) (cons t 'thousand) (cons h 'END))]
       [(list   m t h) (list (cons m 'million) (cons t 'thousand) (cons h 'END))]
       [(list     t h) (list (cons t 'thousand) (cons h 'END))]
       [(list       h) (list (cons h 'END))])))
 
-;(step3 3970)
 (define (n-join lst)
   (string-join (map number->string lst)) "")
 
-;(step3 3222)
-;[3222 == '((3 . thousand) (222 . END))]
+(define (num->word n)
+  (let ([len (string-length (number->string n))])
+    (if (<= len 2)
+      (step1 n)
+      (hundredz n))))
 
+(define (build-str p)
+  ;(pp "build-str p" p)
+  (let* ([num (car p)]
+         [num-str (number->string num)]
+         [num-len (string-length num-str)]
+         [place (symbol->string (cdr p))])
+    #| (pp "build-str num-str" num-str) |#
+    #| (pp "build-str place" place) |#
+    (if (> num 0)
+      (cond [(string=? place "END") (num->word num)]
+            [(<= num-len 2) (string-append (step1 num) " " place)]
+            [else (string-append (hundredz num) " " place)])
+      #f)))
+  
 (define (step4 N)
-  (displayln (format "step4 calling ~a" N))
-  (let* ([r3 (step3 N)]
-         [r4 (step1 r3)])
-    (displayln (format "r3 ~a" r3))
-    (displayln (format "r4 ~a" r4))
-    ;(step1 (car r))
-    r4)) 
+  (if (zero? N)
+    "zero"
+    ;(displayln (format "step4 calling ~a" N))
+    (let ([len (string-length (number->string N))]
+          [s3 (step3 N)])
+      (pp "here" s3)
+      (if (negative? N)
+        (string-append "negative " (string-join (filter-map build-str s3) " "))
+        (string-join (filter-map build-str s3) " ")))))
+          
+(define (even-hundred lst)
+  (match lst
+    [(list a b c) (string-append (vector-ref under-20 (char->n (first lst))) " hundred")]))
+
+(define (other-hundred lst)
+  (string-append (vector-ref under-20 (char->n (first lst))) " hundred " (step1 (charlist->n (rest lst)))))
 
 (define (hundredz n)
   (let ([lst (string->list (number->string n))])
-    (pp "hundredz len" (length lst))
+    ;(pp "hundredz len" (length lst))
     ;(string-append (vector-ref tens (char->n (first lst)) " hundred " (step1 (charlist->n (rest lst)))))
     (match lst
       [(list a b c) (cond
-                      [(and (zero? (char->n b)) (zero? (char->n c))) (string-append (vector-ref under-20 (char->n (first lst))) " hundred")]
-                      [else (string-append (vector-ref under-20 (char->n a)) " hundred " (step1 (charlist->n (rest lst))))])])))
+                      [(and (zero? (char->n b)) (zero? (char->n c))) (even-hundred lst)]
+                      [else (other-hundred lst)])])))
 
+; (if (negative? (char->n a)) "negative " "") 
