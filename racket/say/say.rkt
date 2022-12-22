@@ -105,6 +105,7 @@
   (let ([lst (step2 n)])
     ;(displayln (format "step3 lst: ~a\n" lst))
     (match lst
+      [(list tr b m t h) (list (cons tr 'trillion) (cons b 'billion) (cons m 'million) (cons t 'thousand) (cons h 'END))]
       [(list b m t h) (list (cons b 'billion) (cons m 'million) (cons t 'thousand) (cons h 'END))]
       [(list   m t h) (list (cons m 'million) (cons t 'thousand) (cons h 'END))]
       [(list     t h) (list (cons t 'thousand) (cons h 'END))]
