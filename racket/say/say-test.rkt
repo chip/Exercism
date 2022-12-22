@@ -8,7 +8,7 @@
   (define-syntax-rule (check-equal* f [arg == val] ...)
     (begin (check-equal? (f arg) val) ...))
 
-  (define-syntax-rule (check-exn* f pat [arg] ...)
+  (define-syntax-rule (check-exn* f [arg] ...)
     (begin (check-exn exn:fail:contract? (lambda () (f arg))) ...))
 
   (define step*

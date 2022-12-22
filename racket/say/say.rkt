@@ -1,30 +1,11 @@
 #lang racket
 
 ;; Converts integers to English-language descriptions
-
-;; --- NOTE -------------------------------------------------------------------
-;; The test cases in "say-test.rkt" assume:
-;; - Calling a function with an out-of-range argument triggers a contract error
-;; - That `step3` returns a list of (number, symbol) pairs
-;;
-;; We have provided sample contracts so the tests compile, but you
-;;  will want to edit & strengthen these.
-;;
-;; (For example, things like 0.333 and 7/8 pass the `number?` contract
-;;  but these functions expect integers and natural numbers)
-;; ----------------------------------------------------------------------------
-
 (require racket/contract)
 
-(define (pp label x)
-  (displayln (format "*[~a] ~a" label x)))
-
 (define/contract (two-digit-number? n)
-  (exact-nonnegative-integer? . -> . boolean?)
-  #| (pp "two-digit-number?" n) |#
-  #| (pp "exact-nonnegative-integer?" (exact-nonnegative-integer? n)) |#
-  #| (pp "length" (<= (string-length (number->string n)) 2)) |#
-  (<= (string-length (number->string n)) 2))
+  (any/c . -> . boolean?)
+  (and (>= n 0) (< n 100)))
 
 (provide
 
@@ -41,69 +22,37 @@
     [step4 (-> exact-integer? string?)]))
     ;; Convert a number to an English-language string
 
-
 ;; =============================================================================
-(define under-20 (vector "zero" "one" "two" "three" "four" "five" "six" "seven"
-                         "eight" "nine" "ten" "eleven" "twelve" "thirteen"
-                         "fourteen" "fifteen" "sixteen" "seventeen" "eighteen"
-                         "nineteen"))
+(define under-20 (vector "zero" "one" "two" "three" "four" "five" "six" "seven" "eight"
+                         "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen"
+                         "sixteen" "seventeen" "eighteen" "nineteen"))
 
-(define tens (vector "ZERO" "TEN" "twenty" "thirty" "forty" "fifty" "sixty" "seventy" "eighty" "ninety"))
+(define tens (vector "zero" "ten" "twenty" "thirty" "forty" "fifty" "sixty" "seventy" "eighty" "ninety"))
 
-(define (charlist->n lst)
-  ;(displayln (format "[charlist->num] ~a\n" lst))
-  (string->number (string-join (map string lst) "")))
-
-(define (char->n c)
-  (string->number (string c)))
+(define (n->list n)
+  (map string->number (map string (string->list (number->string n)))))
 
 (define (step1 n)
-  #| (displayln (format "step1 n: ~a\n" n)) |#
-  ; TODO enforce contract for 2-digit-number? to remove conditional
-  (cond [(< n 20) (vector-ref under-20 n)]
-        [else
-          (let ([lst (string->list (number->string n))])
-            ;(displayln (format "lst: ~a\n" lst))
-            (match lst
-              [(list a b) (cond [(zero? (char->n b)) (vector-ref tens (char->n a))]
-                                [else (string-append (vector-ref tens (char->n a)) "-" (step1 (char->n b)))])]
-              [(list a) (vector-ref under-20 n)]))]))
+  (let ([lst (n->list n)])
+    (match lst
+      [(list a) (vector-ref under-20 n)]
+      [(list a b) (cond [(zero? b) (vector-ref tens a)]
+                        [(< n 20) (vector-ref under-20 n)]
+                        [else (string-append (vector-ref tens a) "-" (vector-ref under-20 b))])])))
 
-;(step1 -1) ; SHOULD throw
-;(step1 100) ; SHOULD throw
-
-;(step1 700)
-#| (conv 14) ; becomes "fourteen". |#
-#| (conv 100) ; becomes "one hundred". |#
-#| (conv 120) ; becomes "one hundred and twenty". |#
-#| (conv 1002) ; becomes "one thousand and two". TODO Handle n w/ 3 or more digits |#
-#| (conv 1323) ; becomes "one thousand three hundred and twenty-three". TODO see above |#
-#| (conv 1234567890) ; should yield `'1 billion 234 million 567 thousand 890'` TODO see above |#
-#| (conv 12345); should give `twelve thousand three hundred forty-five`. TODO see above |#
 (define (step2 N)
   (define (pos lst)
-    ;(displayln (format "length: ~a\tpos: ~a\n" (length lst) (min (length lst) 3)))
     (min (length lst) 3))
 
-  (define (list->number lst)
-    ;(displayln (format "list->number ~a\n" lst))
-    (if (empty? lst)
-      #f
-      (string->number (string-join (map number->string (take-right lst (pos lst))) ""))))
-
-  (let loop ([lst (filter number? (map string->number (regexp-split #rx"" (number->string N))))]
+  (let loop ([lst (filter number? (n->list N))]
              [acc '()])
-    (let* ([len (length lst)]
-           [num (list->number lst)])
-      ;(displayln (format "lst ~a\tacc ~a\tlen ~a\tnum ~a\n" lst acc len num))
+    (let* ([num (string->number (string-join (map number->string (take-right lst (pos lst))) ""))])
       (if (empty? lst)
         acc
         (loop (drop-right lst (pos lst)) (append (list num) acc))))))
 
-
 (define (step3 n)
   (let ([lst (step2 n)])
-    ;(displayln (format "step3 lst: ~a\n" lst))
     (match lst
       [(list tr b m t h) (list (cons tr 'trillion) (cons b 'billion) (cons m 'million) (cons t 'thousand) (cons h 'END))]
       [(list b m t h) (list (cons b 'billion) (cons m 'million) (cons t 'thousand) (cons h 'END))]
@@ -111,54 +60,34 @@
       [(list     t h) (list (cons t 'thousand) (cons h 'END))]
       [(list       h) (list (cons h 'END))])))
 
-(define (n-join lst)
-  (string-join (map number->string lst)) "")
-
-(define (num->word n)
-  (let ([len (string-length (number->string n))])
-    (if (<= len 2)
-      (step1 n)
-      (hundredz n))))
-
-(define (build-str p)
-  ;(pp "build-str p" p)
-  (let* ([num (car p)]
-         [num-str (number->string num)]
-         [num-len (string-length num-str)]
-         [place (symbol->string (cdr p))])
-    #| (pp "build-str num-str" num-str) |#
-    #| (pp "build-str place" place) |#
-    (if (> num 0)
-      (cond [(string=? place "END") (num->word num)]
-            [(<= num-len 2) (string-append (step1 num) " " place)]
-            [else (string-append (hundredz num) " " place)])
-      #f)))
-  
 (define (step4 N)
   (if (zero? N)
     "zero"
-    ;(displayln (format "step4 calling ~a" N))
-    (let ([len (string-length (number->string N))]
-          [s3 (step3 N)])
-      (pp "here" s3)
-      (if (negative? N)
-        (string-append "negative " (string-join (filter-map build-str s3) " "))
-        (string-join (filter-map build-str s3) " ")))))
+    (let* ([s3 (step3 N)]
+           [prefix (if (negative? N) "negative " "")])
+      (string-append
+        prefix
+        (string-join
+          (filter-map
+            (lambda (p)
+              (let* ([n (car p)]
+                     [len (string-length (number->string n))]
+                     [place (symbol->string (cdr p))])
+                (if (not (positive? n))
+                  #f
+                  (cond [(and (string=? place "END") (<= len 2)) (step1 n)]
+                        [(string=? place "END") (hundreds n)]
+                        [(<= len 2) (string-append (step1 n) " " place)]
+                        [else (string-append (hundreds n) " " place)]))))
+            s3)
+          " ")))))
           
-(define (even-hundred lst)
-  (match lst
-    [(list a b c) (string-append (vector-ref under-20 (char->n (first lst))) " hundred")]))
+(define (hundreds n)
+  (define (charlist->n lst)
+    (string->number (string-join (map number->string lst) "")))
 
-(define (other-hundred lst)
-  (string-append (vector-ref under-20 (char->n (first lst))) " hundred " (step1 (charlist->n (rest lst)))))
-
-(define (hundredz n)
-  (let ([lst (string->list (number->string n))])
-    ;(pp "hundredz len" (length lst))
-    ;(string-append (vector-ref tens (char->n (first lst)) " hundred " (step1 (charlist->n (rest lst)))))
+  (let* ([lst (n->list n)]
+         [even-hundred (string-append (vector-ref under-20 (first lst)) " hundred")])
     (match lst
-      [(list a b c) (cond
-                      [(and (zero? (char->n b)) (zero? (char->n c))) (even-hundred lst)]
-                      [else (other-hundred lst)])])))
-
-; (if (negative? (char->n a)) "negative " "") 
+      [(list a b c) (cond [(and (zero? b) (zero? c)) even-hundred]
+                          [else (string-append even-hundred " " (step1 (charlist->n (rest lst))))])])))
