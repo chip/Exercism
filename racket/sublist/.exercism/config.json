@@ -1,0 +1,17 @@
+{
+  "authors": [
+    "czrpb"
+  ],
+  "files": {
+    "solution": [
+      "sublist.rkt"
+    ],
+    "test": [
+      "sublist-test.rkt"
+    ],
+    "example": [
+      ".meta/example.rkt"
+    ]
+  },
+  "blurb": "Write a function to determine if a list is a sublist of another list."
+}
