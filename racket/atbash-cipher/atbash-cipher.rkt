@@ -2,39 +2,25 @@
 
 (provide encode decode)
 
-(define plain '(a b c d e f g h i j k l m n o p q r s t u v w x y z))
-(define cipher '(z y x w v u t s r q p o n m l k j i h g f e d c b a))
+(define alphabet '(#\a #\b #\c #\d #\e #\f #\g #\h #\i #\j #\k #\l #\m #\n #\o #\p #\q #\r #\s #\t #\u #\v #\w #\x #\y #\z))
+(define ending-index (sub1 (length alphabet)))
+(define ascii-offset 97)
 
-(define (s->cipher s)
-  (if (regexp-match? #px"[a-z]" s)
-    (symbol->string (list-ref cipher (index-of plain (string->symbol s))))
-    s))
+(define (lookup-char c)
+  (if (char-numeric? c)
+    (string c)
+    (if (char-lower-case? c)
+      (string (integer->char (+ ascii-offset (- ending-index (index-of alphabet c)))))
+      #f)))
 
-(define (s->plain s)
-  (if (regexp-match? #px"[a-z]" s)
-    (symbol->string (list-ref plain (index-of cipher (string->symbol s))))
-    s))
+(define (parse s)
+  (regexp-match* #px"(.{1,5})" s #:match-select cadr))
 
-(define (convert-chunk lst)
-  (map (lambda (w)
-         (map s->cipher (map string (string->list w))))
-      lst))
-
-(define (build-5-letter-strings s)
-  (regexp-match* #px"(.{1,5})" (regexp-replace* #rx"[,. ]" (string-downcase s) "")))
-
-(define (join-chunks lst)
-  (string-append "" (string-join lst "")))
+(define (sanitize-string->list s)
+  (string->list (regexp-replace* #rx"[,. ]" (string-downcase s) "")))
 
 (define (encode m)
-  (string-join (map join-chunks (convert-chunk (build-5-letter-strings m))) " "))
+  (string-join (parse (string-join (filter-map lookup-char (sanitize-string->list m)) ""))))
 
 (define (decode m)
-  (let ([s (string-replace m " " "")])
-    (string-join
-      (map (lambda (c)
-             (if (regexp-match? #px"[a-z]" c)
-               (symbol->string (list-ref plain (index-of cipher (string->symbol c))))
-               c))
-           (map string (string->list s)))
-      "")))
+  (string-join (filter-map lookup-char (string->list m)) ""))
