@@ -12,8 +12,8 @@
       (loop (cons (reverse-string (substring chars 0 7)) acc) (substring chars 7 (string-length chars)))
       (cons (reverse-string chars) acc))))
 
-(define (padded-binary-string s)
-  (~r s #:base 2 #:min-width 8 #:pad-string "0"))
+(define (padded-binary-string n)
+  (~r n #:base 2 #:min-width 8 #:pad-string "0"))
 
 (define (set-continuation-bit s setbit)
   (let ([bs (padded-binary-string (string->number s 2))])
@@ -40,6 +40,14 @@
           (let ([setbit (> (length remaining) 1)])
             (values (append acc (list (set-continuation-bit bs setbit))) (rest remaining))))))))
 
+;;; TODO for each num: convert to binary string, remove continuation bit, join, convert to decimal
 (define (decode . nums)
-  (error "Not implemented yet"))
+  (for/fold ([memo '()])
+            ([n (in-list nums)])
+    (if (< n 128)
+      (append memo (list n))
+      (let ([bs (padded-binary-string n)])
+        (printf "bs ~a\n" bs)
+        (string-set! bs 0 #\0)
+        (values (append memo (list (string->number bs))))))))
 

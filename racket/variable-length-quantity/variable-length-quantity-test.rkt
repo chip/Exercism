@@ -85,16 +85,16 @@
 
   (define decode-tests
     (test-suite
-     "Decode a series of bytes, producing a series of integers."))
+     "Decode a series of bytes, producing a series of integers."
 
         ;;; Simple byte tests
-        ;(test-equal? "one byte"
-        ;              (decode 127)
-        ;              '(127)
+        (test-equal? "one byte"
+                      (decode 127)
+                      '(127))
 
-        ;(test-equal? "two bytes"
-        ;              (decode 192 0)
-        ;              '(8192))
+        (test-equal? "two bytes"
+                      (decode 192 0)
+                      '(8192))))
 
         ;(test-equal? "three bytes"
         ;              (decode 255 255 127)
