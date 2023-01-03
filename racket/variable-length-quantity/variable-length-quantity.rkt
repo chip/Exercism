@@ -2,24 +2,27 @@
 
 (provide encode decode)
 
-(define l "abcdefghijklmnopqrstuvwxyz")
 (define (reverse-string s)
   (list->string (reverse (string->list s))))
-;(reverse-string l)
 
 (define (every-7-s s)
   (let loop ([acc '()]
              [chars (reverse-string s)])
-    (displayln (format "acc: ~v\nchars: ~v\n" acc chars))
+    ;(displayln (format "acc: ~v\nchars: ~v\n" acc chars))
     ;(displayln (format "chars: ~a\tlength: ~a" chars (length chars)))
     (if (> (string-length chars) 7)
       (loop (cons (reverse-string (substring chars 0 7)) acc) (substring chars 7 (string-length chars)))
       (cons (reverse-string chars) acc))))
 
 (define (set-continuation-bit s)
-  (let ([bs (~r (string->number s) #:base 2 #:min-width 8 #:pad-string "0")])
+  ;(printf "set-continuation-bit ~a\n" s)
+  ;(printf "string->number ~a\n" (string->number s 2))
+  ;(let ([bs (~r (string->number s) #:base 2 #:min-width 8 #:pad-string "0")]))
+  (let ([bs (~r (string->number s 2) #:base 2 #:min-width 8 #:pad-string "0")])
+    ;(printf "bs ~a\n" bs)
     (string-set! bs 0 #\1)
     bs))
+
 ;;; Both of these should expect to take a variable number of arguments.
 ;;; You may wish to make a version that accepts a single argument first
 ;;; as that will make debugging easier.
@@ -30,22 +33,26 @@
   ; TODO need second loop for every-7 ???
   (let* ([n (first nums)]
          [binlist (every-7-s (d->b n))])
-    (printf "n ~a\n" n)
-    (printf "binlist ~a list? ~a\n" binlist (list? binlist))
-    (let loop ([acc '()]
-               [lst binlist])
-      (printf "lst: ~a\n" lst)
-      (printf "first lst: ~a\n" (first lst))
-      ; TODO set high-order bit for loop
-      (let ([curr (set-continuation-bit (first lst))])
-        (printf "curr: ~a\n" curr)
-        (if (= (length lst) 1)
-          (begin
-            (printf "string? ~a\n" (string? curr))
-            (let ([los (append acc (list (first lst)))])
-              (printf "los ~a list? ~a pair? ~a\n" los (list? los) (pair? los))
-              (map (lambda (x) (string->number (~r (string->number x) #:base 10) 2)) los)))
-          (loop (append acc (list curr)) (rest lst)))))))
+    ;(printf "n ~a\n" n)
+    ;(printf "binlist ~a list? ~a\n" binlist (list? binlist))
+    (if (< n 128)
+      (list n)
+      (let loop ([acc '()]
+                 [lst binlist])
+        ;(printf "acc ~a\n" acc)
+        ;(printf "lst: ~a\n" lst)
+        ;(printf "first lst: ~a\n" (first lst))
+        ; TODO set high-order bit for loop
+        (let ([curr (set-continuation-bit (first lst))])
+          ;(printf "curr: ~a\n" curr)
+          ;(printf "(list curr): ~a\n" (list curr))
+          (if (= (length lst) 1)
+            (begin
+              ;(printf "string? ~a\n" (string? curr))
+              (let ([los (append acc (list (first lst)))])
+                ;(printf "los ~a list? ~a pair? ~a\n" los (list? los) (pair? los))
+                (map (lambda (x) (string->number (~r (string->number x) #:base 10) 2)) los)))
+            (loop (append acc (list curr)) (rest lst))))))))
 
 (define (old_encode . nums)
   ;(error "Not implemented yet"))
