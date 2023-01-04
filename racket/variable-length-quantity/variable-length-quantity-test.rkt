@@ -94,28 +94,28 @@
 
         (test-equal? "two bytes"
                       (decode 192 0)
-                      '(8192))))
+                      '(8192))
 
-        ;(test-equal? "three bytes"
-        ;              (decode 255 255 127)
-        ;              '(2097151))
+        (test-equal? "three bytes"
+                      (decode 255 255 127)
+                      '(2097151))
 
-        ;(test-equal? "four bytes"
-        ;              (decode 129 128 128 0)
-        ;              '(2097152))
+        (test-equal? "four bytes"
+                      (decode 129 128 128 0)
+                      '(2097152))
 
-        ;(test-equal? "maximum 32-bit integer"
-        ;              (decode 143 255 255 255 127)
-        ;              '(4294967295))
+        (test-equal? "maximum 32-bit integer"
+                      (decode 143 255 255 255 127)
+                      '(4294967295))
 
-        ;;;; Error checking...
-        ;(test-exn "incomplete sequence causes error"
-        ;              exn:fail?
-        ;              (lambda () (decode 255)))
+        ;;; Error checking...
+        (test-exn "incomplete sequence causes error"
+                      exn:fail?
+                      (lambda () (decode 255)))
 
-        ;(test-exn "incomplete sequence causes error, even if value is zero"
-        ;              exn:fail?
-        ;              (lambda () (decode 128)))
+        (test-exn "incomplete sequence causes error, even if value is zero"
+                      exn:fail?
+                      (lambda () (decode 128)))))
 
         ;(test-equal? "multiple values"
         ;              (decode 192 0 200 232 86 255 255 255 127 0 255 127 129 128 0)

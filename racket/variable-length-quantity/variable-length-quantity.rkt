@@ -40,14 +40,22 @@
           (let ([setbit (> (length remaining) 1)])
             (values (append acc (list (set-continuation-bit bs setbit))) (rest remaining))))))))
 
+(define (convert memo)
+  (printf "memo: ~a\n" memo)
+  (printf "memo string-join: ~a\n" (string-join memo ""))
+  (printf "memo string-number ~a\n" (string->number (string-join memo "") 2))
+  (list (string->number (string-join memo "") 2)))
+
 ;;; TODO for each num: convert to binary string, remove continuation bit, join, convert to decimal
 (define (decode . nums)
-  (for/fold ([memo '()])
+  (when (and (= 1 (length nums)) (>= (first nums) 128))
+    (error 'incomplete-sequence))
+  (for/fold ([memo '()]
+             #:result (convert memo))
             ([n (in-list nums)])
-    (if (< n 128)
-      (append memo (list n))
-      (let ([bs (padded-binary-string n)])
-        (printf "bs ~a\n" bs)
-        (string-set! bs 0 #\0)
-        (values (append memo (list (string->number bs))))))))
+    (let ([bs (padded-binary-string n)])
+      (printf "n ~a bs ~a\n" n bs)
+      ;(printf "substring ~a\n" (substring bs 1 8))
+      ;(string-set! bs 0 #\0)
+      (values (append memo (list (substring bs 1 8)))))))
 
