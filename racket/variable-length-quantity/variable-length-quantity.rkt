@@ -5,13 +5,20 @@
 (define (reverse-string s)
   (list->string (reverse (string->list s))))
 
-(define (every-7-digits s)
+(define (split-at-x-chars x s)
+  ;(printf "split-at-x-chars ~a\n" s)
   (let loop ([acc '()]
              [chars (reverse-string s)])
-    (if (> (string-length chars) 7)
-      (loop (cons (reverse-string (substring chars 0 7)) acc) (substring chars 7 (string-length chars)))
+    ;(printf "chars ~a\n" chars)
+    ;(printf "split-at acc ~a\n" acc)
+    (if (> (string-length chars) x)
+      (loop (cons (reverse-string (substring chars 0 x)) acc) (substring chars x (string-length chars)))
       (cons (reverse-string chars) acc))))
 
+;(string->number "#b0100000000000000")
+;(string->number "#b1111111111100000")
+;(string->number "#b1111110000000111")
+;(string->number "#b1111111111111111")
 (define (padded-binary-string n)
   (~r n #:base 2 #:min-width 8 #:pad-string "0"))
 
@@ -21,7 +28,7 @@
       (string-set! bs 0 #\1))
     bs))
 
-(define (convert-list-of-strings acc)
+(define (los->encode acc)
   (map (lambda (x) (string->number (~r (string->number x)) 2)) acc))
 
 ;;; Both of these should expect to take a variable number of arguments.
@@ -32,30 +39,25 @@
             ([n (in-list nums)])
     (if (< n 128)
       (append memo (list n))
-      (let ([lst (every-7-digits (padded-binary-string n))])
+      (let ([lst (split-at-x-chars 7 (padded-binary-string n))])
         (for/fold ([acc '()]
                    [remaining lst]
-                   #:result (append memo (convert-list-of-strings acc)))
+                   #:result (append memo (los->encode acc)))
                   ([bs (in-list lst)])
           (let ([setbit (> (length remaining) 1)])
             (values (append acc (list (set-continuation-bit bs setbit))) (rest remaining))))))))
 
-(define (convert memo)
-  (printf "memo: ~a\n" memo)
-  (printf "memo string-join: ~a\n" (string-join memo ""))
-  (printf "memo string-number ~a\n" (string->number (string-join memo "") 2))
-  (list (string->number (string-join memo "") 2)))
-
-;;; TODO for each num: convert to binary string, remove continuation bit, join, convert to decimal
 (define (decode . nums)
   (when (and (= 1 (length nums)) (>= (first nums) 128))
     (error 'incomplete-sequence))
-  (for/fold ([memo '()]
-             #:result (convert memo))
+  (for/fold ([buf ""]
+             [memo '()]
+             #:result (map (lambda (x) (string->number x 2)) memo))
             ([n (in-list nums)])
-    (let ([bs (padded-binary-string n)])
-      (printf "n ~a bs ~a\n" n bs)
-      ;(printf "substring ~a\n" (substring bs 1 8))
-      ;(string-set! bs 0 #\0)
-      (values (append memo (list (substring bs 1 8)))))))
-
+    ;(printf "buf ~a memo ~a\n" buf memo)
+    (let* ([bs (padded-binary-string n)]
+           [bits (substring bs 1 8)])
+      ;(printf "n ~a bs ~a bits ~a\n" n bs bits)
+      (if (regexp-match? #rx"^1" bs)
+        (values (string-append buf bits) memo)
+        (values "" (append memo (list (string-append buf bits))))))))

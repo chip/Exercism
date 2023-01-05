@@ -115,11 +115,11 @@
 
         (test-exn "incomplete sequence causes error, even if value is zero"
                       exn:fail?
-                      (lambda () (decode 128)))))
+                      (lambda () (decode 128)))
 
-        ;(test-equal? "multiple values"
-        ;              (decode 192 0 200 232 86 255 255 255 127 0 255 127 129 128 0)
-        ;              '(8192 1193046 268435455 0 16383 16384))))
+        (test-equal? "multiple values"
+                      (decode 192 0 200 232 86 255 255 255 127 0 255 127 129 128 0)
+                      '(8192 1193046 268435455 0 16383 16384))))
     
 
   (begin
