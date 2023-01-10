@@ -3,37 +3,24 @@
 (provide sublist?)
 
 (define (sublist-found? s l)
-  ;(displayln (format "s ~a l ~a" s l))
   (if (empty? s)
     #t
-    (let loop ([l l])
-      (if (empty? l)
-        #f
-        (let* ([ele (first s)]
-               [i (index-of l ele)]
-               [len (length s)])
-          ;(displayln (format "ele ~a i ~a" ele i))
-          (if (not i)
+    (if (empty? l)
+      #f
+      (if (list-prefix? s l)
+        #t
+        (let* ([len (length s)]
+               [i (index-of l (first s))])
+          (if (or (not i) (> len (length l)))
             #f
-            (if (> len (length l))
-              #f
-              (let ([remaining (drop l i)])
-                (if (> len (length remaining))
-                  #f
-                  (let ([sl (take remaining len)])
-                    (when (equal? s '(1 2 3))
-                      (displayln (format "s ~a l ~a sl ~a" s l sl)))
-                    (if (equal? s sl)
-                      #t
-                      (loop (rest remaining)))))))))))))
+            (let ([remaining (drop l i)])
+              (if (> len (length remaining))
+                #f
+                (if (equal? s (take remaining len))
+                  #t
+                  (sublist-found? s (rest remaining)))))))))))
 
 (define (sublist? s l)
-  (if (equal? s l)
-    'equal
-    (if (empty? s)
-      'sublist
-      (if (empty? l)
-        'superlist
-        (cond [(sublist-found? s l) 'sublist]
-              [(sublist-found? l s) 'superlist]
-              [else 'unequal])))))
+  (cond [(= (length s) (length l)) (if (equal? s l) 'equal 'unequal)]
+        [(< (length s) (length l)) (if (sublist-found? s l) 'sublist 'unequal)]
+        [else (if (sublist-found? l s) 'superlist 'unequal)]))

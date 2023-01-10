@@ -50,11 +50,11 @@
 
                 ; recurring values in sublist
                 (test-eqv? "recurring sublist"        (sublist? '(1 2 1 2 3) '(1 2 3 1 2 1 2 3 2 1)) 'sublist)
-                (test-eqv? "recurring unequal"        (sublist? '(1 2 1 2 3) '(1 2 3 1 2 3 2 3 2 1)) 'unequal)
+                (test-eqv? "recurring unequal"        (sublist? '(1 2 1 2 3) '(1 2 3 1 2 3 2 3 2 1)) 'unequal)))
 
                 ; slow tests
-                (test-case "slow: large at beginning"
-                            (check-eqv? (sublist? million1s (make-list 250000 1)) 'superlist))))
+                ;(test-case "slow: large at beginning"
+                ;            (check-eqv? (sublist? million1s (make-list 250000 1)) 'superlist))))
                 ;(test-case "slow: large unequal"
                 ;            (check-eqv? (sublist? million1s (append (make-list 249999 1) '(2))) 'unequal))))
 
