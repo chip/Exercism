@@ -46,8 +46,8 @@
 
      ; Additional characters but unbalanced
      (test-eqv? "'(1]' is UN-balanced" (balanced? "(1]") #f)
-     (test-eqv? "'{}[1' is UN-balanced" (balanced? "{}[1") #f)
+     (test-eqv? "'{}[1' is UN-balanced" (balanced? "{}[1") #f)))
 
-     ))
+     
 
   (run-tests suite))
