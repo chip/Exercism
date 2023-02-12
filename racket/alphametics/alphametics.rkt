@@ -40,28 +40,23 @@
       (eq-sum? e)))
 
   (define (solution? p)
+    (printf "p ~a\n" p)
     (let ([letter-map (make-hash (map cons letters (stream->list p)))])
       (and (first-letter-not-zero? letter-map)
            (solution-found? letter-map))))
 
-  (define (generate-permutations items size)
-    (gen-perm items size '()))
-
-  (define (gen-perm items size acc)
-    (if (zero? size)
-      '(())
-      (for/list ([t (in-list (gen-perm items (- size 1) acc))]
-                 #:when #t
-                 [i (in-list items)]
-                 #:unless (member i t))
-        (append acc (cons i t)))))
-  
   (define (build p)
+    (printf "build ~a\n" p)
     (map (lambda (l n) (cons (string l) n)) letters p))
 
-  (define result 
-    (for/first ([p (in-list (generate-permutations nums letters-len))]
-                #:when (solution? p))
-      (build p)))
+  (define result
+    (for* ([c (in-combinations nums letters-len)]
+           [p (in-permutations c)]
+           #:when (solution? p))
+      ; TODO need to terminate HERE!
+      (build p)
+      #f))
 
   (if result result '()))
+
+(printf "= ~a\n" (solve "I + BB == ILL"))
