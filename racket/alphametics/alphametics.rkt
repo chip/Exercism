@@ -20,127 +20,95 @@
   (when (> letters-len (length nums))
     '())
 
+  ; (printf "and ~a\n" (and #t #t))
   (define (first-letter-not-zero? lm)
     (andmap
       (lambda (c)
+        ; (printf "notzero? ~a | v ~a | c ~a | fl ~a | lm ~a\n"  (not (zero? (hash-ref lm c 'ERROR-first-letter-not-zero))) (hash-ref lm c 'ERRtest) c first-letters lm)
         (not (zero? (hash-ref lm c 'ERROR-first-letter-not-zero))))
       first-letters))
 
-  ; (define (list->number lst)
-  ;   (string->number (string-join (map number->string lst) "")))
-  ;
-  ; (define (lhs-sum lst)
-  ;   (for/sum ([i (map list->number lst)]) i))
-  ;
-  ; (define (eq-sum? e)
-  ;   (let* ([lhs (take e (sub1 (length e)))]
-  ;          [rhs (last e)])
-  ;     (= (lhs-sum lhs) (list->number rhs))))
+  (define (translate-string str tbl)
+    (define (lookup ch)
+      (hash-ref tbl ch ch))
+    (list->string (map lookup (string->list str))))
 
-  ; (define (map-word w lm)
-  ;   (map (lambda (c) (hash-ref lm c 'ERROR-map-word)) (string->list w)))
+  (define (make-translation-table from to)
+    (define tbl (make-hash))
+    (for ([i (in-range (string-length from))])
+      (hash-set! tbl (string-ref from i) (string-ref to i)))
+    tbl)
 
-  ; POSSIBLE FUTURE APPROACH
-  ; TODO use global hash to store 26 unit assn pairs: (#\A . (char->integer #\A))
-  ; TODO each letter in puzzle should have a digit assigned from a
-  ; permutation, which should be mapped over the global immutable hash (a copy),
-  ; and incremented by permutation value which is reset upon each new
-  ; permutation (by virtue of the immutable original)
+  (define (solution-found? lm p)
+    ; (printf "solution-found? ~a p ~a\n" lm p)
+    (let ([ps (string-join (map number->string p) "")]
+          [ls (string-join (map string letters) "")])
+      ; (printf "ps list->string ~a\n" ps)
+      ; (printf "ls list->string ~a\n" ls)
+      ; TODO how to cache or memoize?
+      ; (printf "puzzle ~a\n" puzzle)
+      (define tbl (make-translation-table ls ps))
+      ; (printf "tbl ~a\n" tbl)
+      (let* ([lhs (translate-string puzzle tbl)]
+             [los (string-split lhs " ")]
+             [lon (map string->number los)]
+             [lhs-sum (foldl + 0 (take lon (sub1 (length lon))))]
+             [rhs-sum (string->number (last los))])
+        ; (printf "lhs-sum ~a\n" lhs-sum)
+        ; (printf "last words ~a\n" (last words))
+        ; (printf "lhs ~a rhs ~a eq? ~a\n" lhs-sum rhs-sum (= lhs-sum rhs-sum))
+        (= lhs-sum rhs-sum))))
 
-  (define (solution-found? lm)
-    (printf "solution-found? ~a\n" lm)
-    ; TODO how to cache or memoize?
-    ; TODO use lm instead of letters, nums for rgxs
-    (define rgxs (map
-                   (lambda (k v) (list (string k) (number->string v)))
-                   (hash-keys lm) (hash-values lm)))
-    (let* ([s (regexp-replaces puzzle rgxs)]
-           ; [los (map string-trim (string-split s #rx"==|[+]"))]
-           [lon (map string->number (string-split s " "))]
-           [lhs (take lon (sub1 (length lon)))]
-           ; [lhs-nums (map string->number lhs)]
-           ; [rhs (string->number (last los))]
-           [rhs (last lon)]
-           [sum (foldl + 0 lhs)])
-      ; (printf "ns ~a\n" ns)
-      ; (printf "los ~a\n" los)
-      ; (printf "lon ~a\n" lon)
-      ; (printf "lon v ~v\n" lon)
-      ; (printf "lhs ~a\n" lhs)
-      ; (printf "lhs v ~v\n" lhs)
-      ; (printf "list? lhs ~a\n" (list? lhs))
-      ; (printf "lhs-nums ~a\n" lhs-nums)
-      ; (printf "rhs ~a\n" rhs) (printf "sum ~a\n" sum)
-      (printf "lhs = ~a sum ~a rhs ~a equal? ~a\n" lhs sum rhs (= sum rhs))
-      (= sum rhs)))
-    
-  ; (define (_solution-found? lm)
-  ;   (let ([e (map (lambda (w) (map-word w lm)) words)])
-  ;     (eq-sum? e)))
-
-  (define (solution? p)
-    ; (printf "p seq? ~a\n" (sequence? p))
-    ; (printf "sequence->list ~a\n" (sequence->list p))
-    (let ([letter-map (make-hash (map cons letters p))])
-      (and (first-letter-not-zero? letter-map)
-           (solution-found? letter-map))))
-
-  ; TODO make hash global
-  (define (build p)
-    (printf "build letters ~a p ~a\n" letters p)
-    (map (lambda (l n) (cons (string l) n)) letters p))
-
-  (define (generate-combinations)
-    (sequence->list (in-combinations nums letters-len)))
-
-  ; TODO could promises be used here?
-  (define (generate-permutations)
-    (define seen (make-hash))
-    (let loop-c ([c (generate-combinations)])
-      (printf "c ~a first ~a\n" c (first c))
-      (if (empty? c)
-        '()
-        (let loop-p ([perm (sequence->list (in-permutations (first c)))])
-          (let ([p (first perm)])
-            ; TODO get first p from list
-            (printf "p ~v\n" p)
-            (if (hash-ref seen p #f)
-              (begin
-                (printf "SEEN! ~v\n" p))
-              (begin
-                (hash-set! seen p #t)
-                (cond [(empty? p) (loop-c (rest c))]
-                      [(solution? (first p)) (first p)]
-                      [else (loop-p (rest p))]))))))))
-
-  ; (define (translate-string str tbl)
-  ;   (define (lookup ch)
-  ;     (hash-ref tbl ch ch))
-  ;   (list->string (map lookup (string->list str))))
-  ;
-  ; (define (make-translation-table from to)
-  ;   (define tbl (make-hash))
-  ;   (for ([i (in-range (string-length from))])
-  ;     (hash-set! tbl (string-ref from i) (string-ref to i)))
-  ;   tbl)
-  ;
   ; (define tbl (make-translation-table "aeiou" "12345"))
   ; (printf "tbl ~a\n" tbl)
   ; (printf "translate ~a\n" (translate-string "hello world" tbl))
 
-  (let ([res (generate-permutations)])
+  ; TODO make hash global
+  (define (build p)
+    (printf "build letters ~a p ~a\n" letters p)
+    (map (lambda (l n) (cons (string l) n)) letters (hash-values p)))
+
+  ; TODO Necessary?
+  (define generate-combinations
+    (sequence->list (in-combinations nums letters-len)))
+
+  ; >>> solve_cryptarithm(['SEND', 'MORE'], 'MONEY')
+  ; letters: NMDSOREY
+  ; initial_letters: MS
+  ; perm: ('0', '1', '2', '3', '4', '5', '6', '7')
+  ; decipher_table: {78: 48, 77: 49, 68: 50, 83: 51, 79: 52, 82: 53, 69: 54, 89: 55}
+  ; TODO could promises be used here?
+  (define generate-permutations
+    (let loop-c ([combos generate-combinations])
+      ; (printf "combos ~a\n" combos)
+      (printf "c ~a\n" (first combos))
+      (if (empty? combos)
+        '()
+        (let loop-p ([perms (sequence->list (in-permutations (first combos)))])
+          ; (printf "perm ~v\n" perm)
+          (if (empty? perms)
+            (loop-c (rest combos))
+            (let* ([p (first perms)]
+                   [lm (make-hash (map cons letters p))])
+              ; TODO map first letters to permutation
+              ; (printf "p ~v\n" p)
+              (if (and (first-letter-not-zero? lm) (solution-found? lm p))
+                lm
+                (loop-p (rest perms)))))))))
+
+  (let ([res generate-permutations])
     (if (empty? res)
       '()
       (build res))))
 
-(printf "solve => ~a\n" (solve "NO + NO + TOO == LATE"))
+; (printf "solve => ~a\n" (solve "NO + NO + TOO == LATE"))
 ; '(("N" . 7))
 ; ("O" . 4)
 ; ("T" . 9)
 ; ("L" . 1)
 ; ("A" . 0)
 ; ("E" . 2))
-; (printf "solve => ~a\n" (solve "I + BB == ILL")
+; (printf "solve => ~a\n" (solve "I + BB == ILL"))
 ; (printf "solve => ~a\n") (solve "A + A + A + A + A + A + A + A + A + A + A + B == BCC")
 ; '(("A" . 9)
 ;   ("B" . 1)
