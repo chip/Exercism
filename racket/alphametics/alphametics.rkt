@@ -39,9 +39,11 @@
       first-letters))
 
   (define (translate-string str tbl)
+    ; (printf str)
     (define (lookup ch)
-      (hash-ref tbl ch ch))
-    (list->string (map lookup (string->list str))))
+      (printf "tbl ~a ch ~a (char->integer ch) ~a\n" tbl ch (char->integer ch))
+      (hash-ref tbl (char->integer ch) ch))
+    (map lookup (string->list str)))
 
   (define (make-translation-table from to)
     (define tbl (make-hash))
@@ -59,22 +61,26 @@
     ; (printf "ls list->string ~a\n" ls)
     ; TODO how to cache or memoize?
     ; (printf "puzzle ~a\n" puzzle)
-    (define tbl (make-translation-table letters p))
+    ; (printf "letters ~v\n" letters)
+    (define tbl (make-translation-table (filter char-alphabetic? (map integer->char letters)) p))
     ; (printf "tbl ~a\n" tbl)
     (define (lookup word)
-      (map (lambda (c) (hash-ref tbl (char->integer c))) (string->list word)))
+      (map (lambda (c) (hash-ref tbl c)) (string->list word)))
     ; (printf "=>> ~a\n" (translate-string puzzle tbl))
     ; (printf "=>> ~a\n" (string-split (translate-string puzzle tbl) " "))
-    (let* ([lhs (translate-string puzzle tbl)]
-           [los (string-split lhs " ")]
+    (let* (
+           ; [lhs (translate-string puzzle tbl)]
+           ; [c (printf "lhs ~a\n" lhs)]
+           ; [los (string-split lhs " ")]
+           ; [f (printf "los ~a\n" los)]
            ; TODO Start here
-           [loln (map lookup los)]
+           [loln (map lookup words)]
            ; [f (printf "los ~a\n" los)]
            ; [g (printf "loln ~a\n" loln)]
            ; [m (map (lambda (n) (printf "~v number? ~a\n" n (char? n))) loln)]
            ; [m (printf "m ~a\n" m)]
-           [lol (map lookup los)]
-           [lol-sum (map (lambda (lon) (foldl + 0 lon)) lol)]
+           ; [lol (map lookup los)]
+           [lol-sum (map (lambda (lon) (foldl + 0 lon)) loln)]
            ; [z (printf "lol-sum ~a\n" lol-sum)]
            [lhs-sum (foldl + 0 (take lol-sum (sub1 (length lol-sum))))]
            [rhs-sum (last lol-sum)])
